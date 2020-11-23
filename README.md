@@ -37,4 +37,6 @@ blender --background --python main.py --test
 ![Screenshot](/example.png)
 
 ## labels
-for label information see https://github.com/microsoft/singleshotpose and https://github.com/ignc-research/Industrial6DPoseEstimation
+for label information see
+* https://github.com/microsoft/singleshotpose 
+* https://github.com/ignc-research/Industrial6DPoseEstimation
