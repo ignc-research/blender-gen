@@ -1,9 +1,0 @@
-Installation
-
-sudo ln -s path/to/blender/blender-2.xx.x-linux64/blender /usr/local/bin/blender
-cd ~
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-cd path/to/blender/blender-2.xx.x-linux64/2.90/python/bin/
-./python3.7m ~/get-pip.py
-./python3.7m -m pip install easydict
-./python3.7m -m pip install opencv-python
