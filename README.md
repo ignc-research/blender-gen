@@ -6,7 +6,7 @@ To bind the 'blender' command to the blender application execute the command
 ```
 sudo ln -s /full/path/to/blender/blender-2.xx.x-linux64/blender /usr/local/bin/blender
 ```
-### optional installation of additional pip packages
+### installation of additional pip packages
 To install pip for Blenders python environment (https://pip.pypa.io/en/stable/installing/#installing-with-get-pip-py):
 
 ```
