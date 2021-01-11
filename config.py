@@ -17,7 +17,7 @@ class cfg:
     self.bg_path = './bg/coco/train2017'
     self.environment_path = './environment'
     #self.random_obj_path = '/home/leon/datasets/tless_models/models_cad/'  # t less
-    self.model_path = './models/3dbox0922marker_new.ply'  # filepath to object
+    self.model_path = './models/H8000.obj' #3dbox0922marker_new.ply'  # filepath to object
     #self.model_path = './models/3dbox0922marker_new.ply'  # filepath to object
 
     self.NumberOfObjects = 1
@@ -31,8 +31,14 @@ class cfg:
     # AUGMENTATION
     self.use_bg_image = False # use Background Images
     self.use_environment_maps = not self.use_bg_image  # use 360° HDRI Panoramas
-    self.emission_min = 1
-    self.emission_max = 3
+    self.emission_min = 1 # only for environment maps
+    self.emission_max = 5 # only for environment maps
+    self.light_number = 1 # only for background images
+    self.light_energymin = 60 # only for background images
+    self.light_energymax = 1000 # only for background images
+    self.random_hsv_value = True # randomize the value of HSV color space of the object with p=0.5
+    self.random_metallic_value = False # randomize the metallic object value with p=0.5
+
 
 
     # OBJECT COLOR (for PLY Files)
@@ -40,6 +46,7 @@ class cfg:
     self.hsv_saturation = 1 # changes saturation of Hue Saturation Value Node, default 1
     self.hsv_value = 1#0.35 # changes value of Hue Saturation Value Node, default 1
     self.roughness  = 0.3#0.1 # Object Material Roughness (0=Mirror, 1=No Reflections)
+
 
     #  CAMERA
     self.clip_end = 50
@@ -75,7 +82,7 @@ class cfg:
     self.obj_rotation_zmin = 0
     self.obj_rotation_zmax = 0
 
-    self.max_boundingbox = 0.2 # filter out objects with bbox < -x or > 1+x
+    self.max_boundingbox = 0.05 # filter out objects with bbox < -x or > 1+x
 
     # camera intrinsics
     self.cam_lens = 4.7 # Camera lens value in mm
@@ -91,6 +98,10 @@ class cfg:
     self.resolution_y = 480
     self.samples = 256  # render engine samples
 
-
     #  OUTPUT
     self.numberOfRenders = 1 # how many rendered examples
+
+
+
+    # temporary variables (dont change anything here)
+    self.metallic = []

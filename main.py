@@ -13,6 +13,8 @@ import numpy as np
 import json
 import argparse
 import datetime
+import colorsys
+import shutil
 from mathutils import Vector, Matrix
 
 sys.path.append(os.getcwd())
@@ -39,7 +41,7 @@ def saveCOCOlabel(images, annotations, Kdict):
       "licenses": "",
     }
 
-    with open("annotation_coco.json", "w") as write_file:
+    with open("DATASET/annotation_coco.json", "w") as write_file:
         json.dump(coco, write_file, indent=2)
 
 
@@ -72,7 +74,7 @@ def importPLYobject(filepath, scale):
 
     # add vertex color to PLY object
     obj.select_set(True)
-    mat = bpy.data.materials.new('material_1')
+    mat = bpy.data.materials.new('Material.001')
     obj.active_material = mat
     mat.use_nodes = True
     nodes = mat.node_tree.nodes
@@ -91,7 +93,7 @@ def importPLYobject(filepath, scale):
     return obj
 
 def importOBJobject(filepath):
-    bpy.ops.import_scene.obj(filepath=filepath)
+    bpy.ops.import_scene.obj(filepath=filepath, axis_forward='Y', axis_up='Z')
     obj_objects = bpy.context.selected_objects[:]
     ctx = bpy.context.copy()
     ctx['active_object'] = obj_objects[0]
@@ -99,6 +101,20 @@ def importOBJobject(filepath):
     bpy.ops.object.join(ctx)  # join multiple elements into one element
     obj_objects[0].name = "Object"  # set object name to "Object"
     obj = bpy.data.objects['Object']
+
+    # create hue saturion value node
+    default_rgb = bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs[0].default_value
+    mat = bpy.data.materials.get('Material.001')
+    nodes = mat.node_tree.nodes
+    hsv = nodes.new(type="ShaderNodeHueSaturation")
+    bsdf = nodes.get("Principled BSDF")
+    hsv.inputs[4].default_value = default_rgb
+    # connect nodes
+    mat.node_tree.links.new(hsv.outputs['Color'], bsdf.inputs['Base Color'])
+
+    # save metallic inputs
+    cfg.metallic = bsdf.inputs['Metallic'].default_value
+
     return obj
 
 
@@ -236,16 +252,17 @@ def setup_light(scene):
     bpy.ops.object.select_by_type(type='LIGHT')
     bpy.ops.object.delete(use_global=False)
 
-    #  place new random light in cartesian coordinates
-    x,y,z = get_sphere_coordinates(random.uniform(cfg.cam_rmin, cfg.cam_rmax), inclination=random.uniform(cfg.cam_incmin, cfg.cam_incmax), azimuth=random.uniform(cfg.cam_azimin, cfg.cam_azimax))
-    #x = random.uniform(2*cfg.cam_xmin, 2*cfg.cam_xmax)
-    #y = random.uniform(2*cfg.cam_ymin, 2*cfg.cam_ymax)
-    #z = random.uniform(2*cfg.cam_zmin, 2*cfg.cam_zmax)
-    lamp_data = bpy.data.lights.new(name='Light', type='POINT')
-    lamp_data.energy = np.random.uniform(60, 5000)  # random energy in Watt
-    lamp = bpy.data.objects.new(name='Light', object_data=lamp_data)
-    bpy.context.collection.objects.link(lamp)
-    lamp.location = (x, y, z)
+    for i in range(cfg.light_number):
+        #  place new random light in cartesian coordinates
+        x,y,z = get_sphere_coordinates(random.uniform(cfg.cam_rmin, cfg.cam_rmax), inclination=random.uniform(cfg.cam_incmin, cfg.cam_incmax), azimuth=random.uniform(cfg.cam_azimin, cfg.cam_azimax))
+        #x = random.uniform(2*cfg.cam_xmin, 2*cfg.cam_xmax)
+        #y = random.uniform(2*cfg.cam_ymin, 2*cfg.cam_ymax)
+        #z = random.uniform(2*cfg.cam_zmin, 2*cfg.cam_zmax)
+        lamp_data = bpy.data.lights.new(name='Light', type='POINT')
+        lamp_data.energy = np.random.uniform(cfg.light_energymin, cfg.light_energymax)  # random energy in Watt
+        lamp = bpy.data.objects.new(name='Light', object_data=lamp_data)
+        bpy.context.collection.objects.link(lamp)
+        lamp.location = (x, y, z)
 
 
 def get_bg_image(bg_path=cfg.bg_path):
@@ -274,7 +291,7 @@ def scene_cfg(camera, i):
     """configure the blender scene with random distributions."""
     scene = bpy.data.scenes['Scene']
     if (not cfg.use_environment_maps):
-        setup_light(scene)  # light source not needed for HDR Maps
+        setup_light(scene)  # light source is not needed for HDR Maps
 
     # background
     if (cfg.use_environment_maps):
@@ -297,6 +314,19 @@ def scene_cfg(camera, i):
         tree = bpy.context.scene.node_tree
         image_node = tree.nodes.get("Image")
         image_node.image = img
+
+    # random HSV material
+    if (random.random() >= 0.5 and cfg.random_hsv_value): # probability of 50% to change value
+        bpy.data.materials["Material.001"].node_tree.nodes["Hue Saturation Value"].inputs[2].default_value = random.random() # random value for hsv
+    else:
+        bpy.data.materials["Material.001"].node_tree.nodes["Hue Saturation Value"].inputs[2].default_value = 1
+
+    # random metallic material
+    if (random.random() >= 0.5 and cfg.random_metallic_value):
+        bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs['Metallic'].default_value = random.random()
+    else:
+        bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs['Metallic'].default_value = cfg.metallic
+
 
     repeat = True
 
@@ -400,16 +430,16 @@ def scene_cfg(camera, i):
         else:
             mode = 'ab'
         if(not repeat):
-            fname = "DATASET/object/labels/{:06}.txt".format(i)
-            f = open(fname, mode)
-            np.savetxt(f,labels, newline=' ', fmt='%1.6f')
-            f.close()
+            #fname = "DATASET/object/labels/{:06}.txt".format(i)
+            #f = open(fname, mode)
+            #np.savetxt(f,labels, newline=' ', fmt='%1.6f')
+            #f.close()
 
 
             # COCO
             image = {
                 "id":           i,
-                "file_name":    "object/images/{:06}".format(i) + '.png',
+                "file_name":    "object/images/{:06}".format(i) + '.jpg',
                 "height":       cfg.resolution_y,
                 "width":        cfg.resolution_x,
                 }
@@ -441,8 +471,9 @@ def setup():
     bpy.context.scene.render.resolution_percentage = 100
     bpy.context.scene.render.image_settings.color_mode = 'RGB'
     bpy.context.scene.render.image_settings.color_depth = '8'  # Bit depth per channel [8,16,32]
-    bpy.context.scene.render.image_settings.file_format = 'PNG'
-    #bpy.context.scene.render.image_settings.compression = 15
+    bpy.context.scene.render.image_settings.file_format = 'JPEG'#'PNG'
+    bpy.context.scene.render.image_settings.compression = 0
+    bpy.context.scene.render.image_settings.quality = 100
 
     # constrain camera to look at blenders (0,0,0) scene origin
     cam_constraint = camera.constraints.new(type='TRACK_TO')
@@ -557,7 +588,7 @@ def render(camera, depth_file_output, test_flag):
     if (test_flag):
         cfg.numberOfRenders=1
     for i in range(cfg.numberOfRenders):
-        bpy.context.scene.render.filepath = './DATASET/object/images/{:06}.png'.format(i)
+        bpy.context.scene.render.filepath = './DATASET/object/images/{:06}.jpg'.format(i)
         bg_img, image, annotation = scene_cfg(camera, i)
         images.append(image)
         annotations.append(annotation)
@@ -593,8 +624,9 @@ def main():
     K, RT = get_camera_KRT(bpy.data.objects['Camera'])
     Kdict = save_camera_matrix(K)  # save Camera Matrix to K.txt
     bpy.ops.wm.save_as_mainfile(filepath="./scene.blend", check_existing=False)  # save current scene as .blend file
-
+    shutil.copy2('config.py', 'DATASET/object') # save config.py file
     saveCOCOlabel(images, annotations, Kdict)
+
 
     ##########################
     # test stuff at the end
