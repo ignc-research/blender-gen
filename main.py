@@ -465,7 +465,7 @@ def scene_cfg(camera, i):
                 "id":              i,
                 "image_id":        i,
                 "bbox":            [min_x*cfg.resolution_x, min_y*cfg.resolution_y, x_range*cfg.resolution_x, y_range*cfg.resolution_y],
-                "category_id":     1,
+                "category_id":     0,
                 "segmentation":    [],
                 "iscrowd":          0,
                 "area":             x_range*cfg.resolution_x*y_range*cfg.resolution_y,
