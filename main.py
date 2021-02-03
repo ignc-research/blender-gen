@@ -80,7 +80,7 @@ def importPLYobject(filepath, scale):
     nodes = mat.node_tree.nodes
     mat_links = mat.node_tree.links
     bsdf = nodes.get("Principled BSDF")
-    bsdf.inputs[7].default_value = cfg.roughness
+    #bsdf.inputs[7].default_value = cfg.roughness
     vcol = nodes.new(type="ShaderNodeVertexColor")
     vcol.layer_name = "Col"
     hsv = nodes.new(type="ShaderNodeHueSaturation")
@@ -102,7 +102,7 @@ def importOBJobject(filepath):
     obj_objects[0].name = "Object"  # set object name to "Object"
     obj = bpy.data.objects['Object']
 
-    # create hue saturion value node
+    # create hue saturation value node
     default_rgb = bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs[0].default_value
     mat = bpy.data.materials.get('Material.001')
     nodes = mat.node_tree.nodes
@@ -112,8 +112,9 @@ def importOBJobject(filepath):
     # connect nodes
     mat.node_tree.links.new(hsv.outputs['Color'], bsdf.inputs['Base Color'])
 
-    # save metallic inputs
+    # save object material inputs
     cfg.metallic = bsdf.inputs['Metallic'].default_value
+    cfg.roughness = bsdf.inputs['Roughness'].default_value
 
     return obj
 
@@ -171,12 +172,23 @@ def setup_camera():
     bpy.data.cameras['Camera'].clip_end = cfg.clip_end
 
     # CAMERA CONFIG
-    #width = cfg.resolution_x
-    #height = cfg.resolution_y
-    camera.data.lens_unit = 'MILLIMETERS'
-    camera.data.lens = cfg.cam_lens
     camera.data.sensor_height = cfg.cam_sensor_height
     camera.data.sensor_width = cfg.cam_sensor_width
+    #width = cfg.resolution_x
+    #height = cfg.resolution_y
+    #camera.data.lens_unit = 'FOV'#'MILLIMETERS'
+    if cfg.cam_lens_unit == 'FOV':
+        camera.data.lens_unit = 'FOV'
+        camera.data.angle = (cfg.cam_fov/360)*2*math.pi
+    else:
+        camera.data.lens_unit = 'MILLIMETERS'
+        camera.data.lens = cfg.cam_lens
+
+    #camera.data.lens = 59#cfg.cam_lens
+    #camera.data.angle = (59/360)*2*math.pi
+    #camera.data.angle_x = (90/360)*2*math.pi
+    #camera.data.angle_y = (59/360)*2*math.pi
+
     #camera.data.shift_x = 0
     #camera.data.shift_y = 0
     #camera.data.sensor_height = camera.data.sensor_width * height / width
@@ -212,9 +224,9 @@ def save_camera_matrix(K):
     # https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
     Kdict = {
       "fx": K[0][0],
-      "cy": K[0][2],
+      "cx": K[0][2],
       "fy": K[1][1],
-      "cx": K[1][2],
+      "cy": K[1][2],
     }
 
     with open("camera_intrinsic.json", "w") as write_file:
@@ -326,6 +338,12 @@ def scene_cfg(camera, i):
         bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs['Metallic'].default_value = random.random()
     else:
         bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs['Metallic'].default_value = cfg.metallic
+
+    # random roughness material
+    if (random.random() >= 0.5 and cfg.random_roughness_value):
+        bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs['Roughness'].default_value = random.random()
+    else:
+        bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs['Roughness'].default_value = cfg.roughness
 
 
     repeat = True
@@ -447,7 +465,7 @@ def scene_cfg(camera, i):
                 "id":              i,
                 "image_id":        i,
                 "bbox":            [min_x*cfg.resolution_x, min_y*cfg.resolution_y, x_range*cfg.resolution_x, y_range*cfg.resolution_y],
-                "category_id":     0,
+                "category_id":     1,
                 "segmentation":    [],
                 "iscrowd":          0,
                 "area":             x_range*cfg.resolution_x*y_range*cfg.resolution_y,
