@@ -65,6 +65,7 @@ def orderCorners(objBB):
 
 def importPLYobject(filepath, scale):
     """import PLY object from path and scale it."""
+    print("PLY is deprecated, please use .OBJ file format for models")
     bpy.ops.import_mesh.ply(filepath=filepath)
     obj_list = bpy.context.selected_objects[:]
     obj_list[0].name = "Object"
@@ -94,17 +95,22 @@ def importPLYobject(filepath, scale):
 
 def importOBJobject(filepath):
     bpy.ops.import_scene.obj(filepath=filepath, axis_forward='Y', axis_up='Z')
+    print("importing model with axis_forward=Y, axis_up=Z")
+
     obj_objects = bpy.context.selected_objects[:]
-    ctx = bpy.context.copy()
-    ctx['active_object'] = obj_objects[0]
-    ctx['selected_objects'] = obj_objects
-    bpy.ops.object.join(ctx)  # join multiple elements into one element
+    #ctx = bpy.context.copy()
+    #ctx['active_object'] = obj_objects[0]
+    #ctx['selected_objects'] = obj_objects
+    #bpy.ops.object.join(ctx)  # join multiple elements into one element
+    #bpy.ops.object.join(obj_objects)  # join multiple elements into one element
     obj_objects[0].name = "Object"  # set object name to "Object"
-    obj = bpy.data.objects['Object']
+    #obj = bpy.data.objects['Object']
+    obj = obj_objects[0]
 
     # create hue saturation value node
-    default_rgb = bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs[0].default_value
-    mat = bpy.data.materials.get('Material.001')
+    mat = obj.active_material
+    default_rgb = mat.node_tree.nodes["Principled BSDF"].inputs[0].default_value
+    #mat = bpy.data.materials.get('Material.001')
     nodes = mat.node_tree.nodes
     hsv = nodes.new(type="ShaderNodeHueSaturation")
     bsdf = nodes.get("Principled BSDF")
@@ -113,8 +119,8 @@ def importOBJobject(filepath):
     mat.node_tree.links.new(hsv.outputs['Color'], bsdf.inputs['Base Color'])
 
     # save object material inputs
-    cfg.metallic = bsdf.inputs['Metallic'].default_value
-    cfg.roughness = bsdf.inputs['Roughness'].default_value
+    cfg.metallic.append(bsdf.inputs['Metallic'].default_value)
+    cfg.roughness.append(bsdf.inputs['Roughness'].default_value)
 
     return obj
 
@@ -315,7 +321,7 @@ def scene_cfg(camera, i):
         # set Emission Node Strength
         bpy.data.worlds['World'].node_tree.nodes['Emission'].inputs[1].default_value = random.uniform(cfg.emission_min, cfg.emission_max)
 
-    elif (cfg.use_bg_image):
+    if (cfg.use_bg_image):
         bg_img = get_bg_image(cfg.bg_path)
         # set camera background image
         img = bpy.data.images.load(os.path.join(cfg.bg_path, bg_img))
@@ -327,23 +333,32 @@ def scene_cfg(camera, i):
         image_node = tree.nodes.get("Image")
         image_node.image = img
 
+    obj_list = bpy.context.selectable_objects # camera, objects
+    x = random.randint(1, len(cfg.model_paths)) # select random object to render, hide the rest
+    for o in obj_list:
+        o.hide_render = True
+    obj_list[x].hide_render = False
+    mat = obj_list[x].active_material
+
     # random HSV material
     if (random.random() >= 0.5 and cfg.random_hsv_value): # probability of 50% to change value
-        bpy.data.materials["Material.001"].node_tree.nodes["Hue Saturation Value"].inputs[2].default_value = random.random() # random value for hsv
+        mat.node_tree.nodes["Hue Saturation Value"].inputs[2].default_value = random.randrange(0, 2.0) # random value for hsv
     else:
-        bpy.data.materials["Material.001"].node_tree.nodes["Hue Saturation Value"].inputs[2].default_value = 1
+        mat.node_tree.nodes["Hue Saturation Value"].inputs[2].default_value = 1
 
     # random metallic material
-    if (random.random() >= 0.5 and cfg.random_metallic_value):
-        bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs['Metallic'].default_value = random.random()
-    else:
-        bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs['Metallic'].default_value = cfg.metallic
+    if (cfg.random_metallic_value):
+        if (random.random() >= 0.5):
+            mat.node_tree.nodes["Principled BSDF"].inputs['Metallic'].default_value = random.random()
+        else:
+            mat.node_tree.nodes["Principled BSDF"].inputs['Metallic'].default_value = cfg.metallic[x-1]
 
     # random roughness material
-    if (random.random() >= 0.5 and cfg.random_roughness_value):
-        bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs['Roughness'].default_value = random.random()
-    else:
-        bpy.data.materials["Material.001"].node_tree.nodes["Principled BSDF"].inputs['Roughness'].default_value = cfg.roughness
+    if (cfg.random_roughness_value):
+        if (random.random() >= 0.5):
+            mat.node_tree.nodes["Principled BSDF"].inputs['Roughness'].default_value = random.random()
+        else:
+            mat.node_tree.nodes["Principled BSDF"].inputs['Roughness'].default_value = cfg.roughness[x-1]
 
 
     repeat = True
@@ -356,23 +371,20 @@ def scene_cfg(camera, i):
         #camera.location.z = random.uniform(cfg.cam_zmin, cfg.cam_zmax)
 
         #obj = bpy.data.objects['Object']
-        obj_list = bpy.context.selectable_objects # camera, objects
 
-        for j in range(1, cfg.NumberOfObjects+1):
-            obj = obj_list[j]
-            if j!=1:
-                obj1 = obj_list[j-1]
-                obj.location = obj1.location
-                obj.rotation_euler = obj1.rotation_euler
-                obj.location.z += 2.1
-            else:
-                # random object pose
-                obj.location.x = random.uniform(cfg.obj_location_xmin, cfg.obj_location_xmax)
-                obj.location.y = random.uniform(cfg.obj_location_ymin, cfg.obj_location_ymax)
-                obj.location.z = random.uniform(cfg.obj_location_zmin, cfg.obj_location_zmax)
-                obj.rotation_euler = (random.uniform(cfg.obj_rotation_xmin*2*math.pi/360, cfg.obj_rotation_xmax*2*math.pi/360),
-		    			random.uniform(cfg.obj_rotation_ymin*2*math.pi/360, cfg.obj_rotation_ymax*2*math.pi/360),
-					random.uniform(cfg.obj_rotation_zmin*2*math.pi/360, cfg.obj_rotation_zmax*2*math.pi/360))
+
+        for j in range(1, 2):
+            obj = obj_list[x]
+            # random object pose
+            #empty_obj.location.x = random.uniform(cfg.obj_location_xmin, cfg.obj_location_xmax)
+            #empty_obj.location.y = random.uniform(cfg.obj_location_ymin, cfg.obj_location_ymax)
+            #empty_obj.location.z = random.uniform(cfg.obj_location_zmin, cfg.obj_location_zmax)
+            #empty_obj.rotation_euler = (random.uniform(cfg.obj_rotation_xmin*2*math.pi/360, cfg.obj_rotation_xmax*2*math.pi/360),
+		    #		random.uniform(cfg.obj_rotation_ymin*2*math.pi/360, cfg.obj_rotation_ymax*2*math.pi/360),
+			#		random.uniform(cfg.obj_rotation_zmin*2*math.pi/360, cfg.obj_rotation_zmax*2*math.pi/360))
+
+            #bpy.context.object.constraints["Track To"].influence = random.uniform(0.7, 1.0)
+            camera.constraints["Track To"].influence = random.uniform(0.7, 1.0)
 
             # background objects location
             #_loc = obj.location + Vector(get_sphere_coordinates(radius=random.uniform(0.3,1.5), inclination=random.uniform(0,math.pi), azimuth=random.uniform(0, 2*math.pi)))
@@ -545,11 +557,12 @@ def setup():
     #obj = bpy.data.objects['Cube']
 
     #  import Model Object
-    for i in range(cfg.NumberOfObjects):
-        if (cfg.model_path[-4:] == '.obj' or cfg.model_path[-4:] == '.OBJ'):
-            obj = importOBJobject(filepath=cfg.model_path)
-        elif (cfg.model_path[-4:] == '.ply' or cfg.model_path[-4:] == '.PLY'):
-            obj = importPLYobject(filepath=cfg.model_path, scale=cfg.model_scale)
+    NumberOfObjects = len(cfg.model_paths)
+    for i in range(NumberOfObjects):
+        if (cfg.model_paths[i][-4:] == '.obj' or cfg.model_paths[i][-4:] == '.OBJ'):
+            obj = importOBJobject(filepath=cfg.model_paths[i])
+        elif (cfg.model_paths[i][-4:] == '.ply' or cfg.model_paths[i][-4:] == '.PLY'):
+            obj = importPLYobject(filepath=cfg.model_paths[i], scale=cfg.model_scale)
 
     #  save Model real world Bounding Box for PnP algorithm
     np.savetxt("model_bounding_box.txt", orderCorners(obj.bound_box))
@@ -577,16 +590,20 @@ def render_cfg():
         bpy.context.scene.cycles.samples = cfg.samples
         bpy.context.scene.cycles.max_bounces = 8
         bpy.context.scene.cycles.use_denoising = cfg.use_cycles_denoising
-        if (cfg.use_cycles_denoising and cfg.use_GPU):
-            bpy.context.scene.cycles.denoiser = 'OPTIX' # Optix AI denoiser on NVIDIA GPU
-        elif(cfg.use_cycles_denoising and not cfg.use_GPU):
-            bpy.context.scene.cycles.denoiser = 'OPENIMAGEDENOISE' # Intel OpenImage AI denoiser on CPU
+        bpy.context.scene.cycles.adaptive_min_samples = 50
+        bpy.context.scene.cycles.use_adaptive_sampling = cfg.use_adaptive_sampling
+        bpy.context.scene.cycles.denoiser = 'OPENIMAGEDENOISE' # Intel OpenImage AI denoiser on CPU
     else:
         bpy.context.scene.render.engine = 'BLENDER_EEVEE'
         bpy.context.scene.eevee.taa_render_samples = cfg.samples
     if(cfg.use_GPU):
         bpy.context.scene.cycles.device = 'GPU'
         bpy.context.preferences.addons['cycles'].preferences.compute_device_type = "CUDA"
+
+        bpy.context.preferences.addons["cycles"].preferences.get_devices() # refresh the list of devices
+        for d in bpy.context.preferences.addons["cycles"].preferences.devices:
+            d["use"] = 1 # activate all devices
+            print("activating device: " + str(d["name"]))
 
 
     # https://docs.blender.org/manual/en/latest/files/media/image_formats.html
