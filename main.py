@@ -65,7 +65,7 @@ def orderCorners(objBB):
 
 def importPLYobject(filepath, scale):
     """import PLY object from path and scale it."""
-    print("PLY is deprecated, please use .OBJ file format for models")
+    #print("PLY is deprecated, please use .OBJ file format for models")
     bpy.ops.import_mesh.ply(filepath=filepath)
     obj_list = bpy.context.selected_objects[:]
     obj_list[0].name = "Object"
@@ -91,6 +91,11 @@ def importPLYobject(filepath, scale):
     #mat_links.new(vcol.outputs['Color'], bsdf.inputs['Base Color'])
     mat_links.new(vcol.outputs['Color'], hsv.inputs['Color'])
     mat_links.new(hsv.outputs['Color'], bsdf.inputs['Base Color'])
+
+    # save object material inputs
+    cfg.metallic.append(bsdf.inputs['Metallic'].default_value)
+    cfg.roughness.append(bsdf.inputs['Roughness'].default_value)
+
     return obj
 
 def importOBJobject(filepath):
