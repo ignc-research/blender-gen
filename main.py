@@ -15,10 +15,12 @@ import argparse
 import datetime
 import colorsys
 import shutil
+import glob
 from mathutils import Vector, Matrix
 
 sys.path.append(os.getcwd())
 import config
+import util
 cfg = config.cfg()
 
 def saveCOCOlabel(images, annotations, Kdict):
@@ -45,27 +47,9 @@ def saveCOCOlabel(images, annotations, Kdict):
         json.dump(coco, write_file, indent=2)
 
 
-
-def orderCorners(objBB):
-    """change bounding box corner order."""
-    # change bounding box order according to
-    # https://github.com/F2Wang/ObjectDatasetTools/blob/master/create_label_files.py
-    out = []
-    corners = [v[:] for v in objBB]  # list of tuples (x,y,z)
-    out.append(corners[0])  # -1 -1 -1
-    out.append(corners[1])  # -1 -1 1
-    out.append(corners[3])  # -1 1 -1
-    out.append(corners[2])  # -1 1 1
-    out.append(corners[4])  # 1 -1 -1
-    out.append(corners[5])  # 1 -1 1
-    out.append(corners[7])  # 1 1 -1
-    out.append(corners[6])  # 1 1 1
-    return out
-
-
 def importPLYobject(filepath, scale):
     """import PLY object from path and scale it."""
-    #print("PLY is deprecated, please use .OBJ file format for models")
+
     bpy.ops.import_mesh.ply(filepath=filepath)
     obj_list = bpy.context.selected_objects[:]
     obj_list[0].name = "Object"
@@ -84,13 +68,13 @@ def importPLYobject(filepath, scale):
     #bsdf.inputs[7].default_value = cfg.roughness
     vcol = nodes.new(type="ShaderNodeVertexColor")
     vcol.layer_name = "Col"
-    hsv = nodes.new(type="ShaderNodeHueSaturation")
-    hsv.inputs[0].default_value = cfg.hsv_hue # hue
-    hsv.inputs[1].default_value = cfg.hsv_saturation # saturation
-    hsv.inputs[2].default_value = cfg.hsv_value # value
-    #mat_links.new(vcol.outputs['Color'], bsdf.inputs['Base Color'])
-    mat_links.new(vcol.outputs['Color'], hsv.inputs['Color'])
-    mat_links.new(hsv.outputs['Color'], bsdf.inputs['Base Color'])
+    #hsv = nodes.new(type="ShaderNodeHueSaturation")
+    #hsv.inputs[0].default_value = cfg.hsv_hue # hue
+    #hsv.inputs[1].default_value = cfg.hsv_saturation # saturation
+    #hsv.inputs[2].default_value = cfg.hsv_value # value
+    mat_links.new(vcol.outputs['Color'], bsdf.inputs['Base Color'])
+    #mat_links.new(vcol.outputs['Color'], hsv.inputs['Color'])
+    #mat_links.new(hsv.outputs['Color'], bsdf.inputs['Base Color'])
 
     # save object material inputs
     cfg.metallic.append(bsdf.inputs['Metallic'].default_value)
@@ -98,8 +82,17 @@ def importPLYobject(filepath, scale):
 
     return obj
 
-def importOBJobject(filepath):
-    bpy.ops.import_scene.obj(filepath=filepath, axis_forward='Y', axis_up='Z')
+def importOBJobject(filepath, distractor=False):
+    name = "Object"
+    file_path = filepath
+    if (distractor==True):
+        name = "Distractor"
+        file_path=glob.glob(filepath+'/*.obj')[0]
+        texture_path=glob.glob(filepath+'/*.png')
+        if (texture_path):
+            texture_path=glob.glob(filepath+'/*.png')[0]
+        
+    bpy.ops.import_scene.obj(filepath=file_path, axis_forward='Y', axis_up='Z')
     print("importing model with axis_forward=Y, axis_up=Z")
 
     obj_objects = bpy.context.selected_objects[:]
@@ -107,21 +100,28 @@ def importOBJobject(filepath):
     #ctx['active_object'] = obj_objects[0]
     #ctx['selected_objects'] = obj_objects
     #bpy.ops.object.join(ctx)  # join multiple elements into one element
-    #bpy.ops.object.join(obj_objects)  # join multiple elements into one element
-    obj_objects[0].name = "Object"  # set object name to "Object"
+    #bpy.ops.object.join(obj_objects)  # join multiple elements into one eleme
+    obj_objects[0].name = name  # set object name
+
     #obj = bpy.data.objects['Object']
     obj = obj_objects[0]
 
     # create hue saturation value node
     mat = obj.active_material
-    default_rgb = mat.node_tree.nodes["Principled BSDF"].inputs[0].default_value
+    #default_rgb = mat.node_tree.nodes["Principled BSDF"].inputs[0].default_value
     #mat = bpy.data.materials.get('Material.001')
     nodes = mat.node_tree.nodes
-    hsv = nodes.new(type="ShaderNodeHueSaturation")
+    #hsv = nodes.new(type="ShaderNodeHueSaturation")
     bsdf = nodes.get("Principled BSDF")
-    hsv.inputs[4].default_value = default_rgb
+    #hsv.inputs[4].default_value = default_rgb
     # connect nodes
-    mat.node_tree.links.new(hsv.outputs['Color'], bsdf.inputs['Base Color'])
+    #mat.node_tree.links.new(hsv.outputs['Color'], bsdf.inputs['Base Color'])
+
+    if (distractor == True and texture_path):  # import distractor png texture
+        texture = nodes.get("Image Texture")
+        bpy.data.images.load(texture_path) # texture need same name as obj file
+        #texture.image = bpy.data.images[-1]  # load latest image as texture
+        texture.image = bpy.data.images[os.path.split(texture_path)[1]]
 
     # save object material inputs
     cfg.metallic.append(bsdf.inputs['Metallic'].default_value)
@@ -211,7 +211,8 @@ def setup_camera():
 
 
 def get_camera_KRT(camera):
-    """return 3x3 camera matrix K and 4x4 rotation, translation matrix RT."""
+    """return 3x3 camera matrix K and 4x4 rotation, translation matrix RT.
+    Experimental feature, the matrix might be wrong!"""
     # https://www.blender.org/forum/viewtopic.php?t=20231
     # Extrinsic and Intrinsic Camera Matrices
     scn = bpy.data.scenes['Scene']
@@ -265,35 +266,38 @@ def place_camera(camera, radius, inclination, azimuth):
     camera.location.x = x
     camera.location.y = y
     camera.location.z = z
+    #camera.rotation_euler[0] = random.uniform(0, 2*math.pi)
+    #camera.rotation_euler[1] = random.uniform(0, 2*math.pi)
+    #camera.rotation_euler[2] = random.uniform(0, 2*math.pi)
+
     bpy.context.view_layer.update()
     return camera
 
 
-def setup_light(scene):
+def setup_light(scene, light_number = 1, random_color = None):
     """create a random point light source."""
-    #  delete old lights
-    bpy.ops.object.select_by_type(type='LIGHT')
-    bpy.ops.object.delete(use_global=False)
-
-    for i in range(cfg.light_number):
+    for i in range(light_number):
         #  place new random light in cartesian coordinates
         x,y,z = get_sphere_coordinates(random.uniform(cfg.cam_rmin, cfg.cam_rmax), inclination=random.uniform(cfg.cam_incmin, cfg.cam_incmax), azimuth=random.uniform(cfg.cam_azimin, cfg.cam_azimax))
-        #x = random.uniform(2*cfg.cam_xmin, 2*cfg.cam_xmax)
-        #y = random.uniform(2*cfg.cam_ymin, 2*cfg.cam_ymax)
-        #z = random.uniform(2*cfg.cam_zmin, 2*cfg.cam_zmax)
-        lamp_data = bpy.data.lights.new(name='Light', type='POINT')
-        lamp_data.energy = np.random.uniform(cfg.light_energymin, cfg.light_energymax)  # random energy in Watt
-        lamp = bpy.data.objects.new(name='Light', object_data=lamp_data)
-        bpy.context.collection.objects.link(lamp)
-        lamp.location = (x, y, z)
+        light_data = bpy.data.lights.new(name="my-light-data", type='POINT')
+        light_data.energy = random.uniform(cfg.light_energymin, cfg.light_energymax)  # random energy in Watt
+        if (random_color == "projector"):
+            light_data.color = colorsys.hsv_to_rgb(random.random(), 1, 1)
+        elif (random_color == "temperature"):
+            light_data.color = util.get_random_temperature_color()
+        light_object = bpy.data.objects.new(name="my-light", object_data=light_data)
+        bpy.context.collection.objects.link(light_object)
+        light_object.location = (x, y, z)
 
-
-def get_bg_image(bg_path=cfg.bg_path):
+def get_bg_image(bg_path=cfg.bg_paths):
     """get list of all background images in folder 'bg_path' then choose random image."""
-    img_list = os.listdir(bg_path)
+    idx = random.randint(0, len(bg_path)-1)
+
+    img_list = os.listdir(bg_path[idx])
     randomImgNumber = random.randint(0, len(img_list)-1)
     bg_img = img_list[randomImgNumber]
-    return bg_img
+    bg_img_path = os.path.join(bg_path[idx], bg_img)
+    return bg_img, bg_img_path
 
 
 def add_shader_on_world():
@@ -314,42 +318,67 @@ def scene_cfg(camera, i):
     """configure the blender scene with random distributions."""
     scene = bpy.data.scenes['Scene']
     if (not cfg.use_environment_maps):
-        setup_light(scene)  # light source is not needed for HDR Maps
+        light_nr = random.randint(cfg.light_number_min, cfg.light_number_max)
+        #setup_light(scene, light_number = light_nr, random_color = "temperature")  # light source is not needed for HDR Maps
+        setup_light(scene, light_number = light_nr, random_color = None)  # light source is not needed for HDR Maps
 
     # background
     if (cfg.use_environment_maps):
         # set HDRI Environment texture
-        bg_img = get_bg_image(cfg.environment_path)
-        bpy.data.images.load(os.path.join(cfg.environment_path, bg_img))
+        bg_img, bg_img_path = get_bg_image(cfg.environment_paths)
+        bpy.data.images.load(bg_img_path)
         bpy.data.worlds['World'].node_tree.nodes['Environment Texture'].image = bpy.data.images[bg_img]
 
         # set Emission Node Strength
         bpy.data.worlds['World'].node_tree.nodes['Emission'].inputs[1].default_value = random.uniform(cfg.emission_min, cfg.emission_max)
 
     if (cfg.use_bg_image):
-        bg_img = get_bg_image(cfg.bg_path)
+        bg_img, bg_img_path = get_bg_image(cfg.bg_paths)
         # set camera background image
-        img = bpy.data.images.load(os.path.join(cfg.bg_path, bg_img))
-        #camera.data.show_background_images = True
-        #bg = camera.data.background_images.new()
-        #bg.image = img
-        # set render background image
+        img = bpy.data.images.load(bg_img_path)
         tree = bpy.context.scene.node_tree
         image_node = tree.nodes.get("Image")
         image_node.image = img
 
     obj_list = bpy.context.selectable_objects # camera, objects
-    x = random.randint(1, len(cfg.model_paths)) # select random object to render, hide the rest
+    mesh_list_objects = []
+    mesh_list_distractors = []
+    
     for o in obj_list:
-        o.hide_render = True
-    obj_list[x].hide_render = False
-    mat = obj_list[x].active_material
+        if o.type == 'MESH':
+            if o.name.find('Distractor') != -1:
+                o.hide_render = True
+                mesh_list_distractors.append(o)
+            elif o.name.find('Object') != -1:
+                o.hide_render = True
+                mesh_list_objects.append(o)
 
-    # random HSV material
-    if (random.random() >= 0.5 and cfg.random_hsv_value): # probability of 50% to change value
-        mat.node_tree.nodes["Hue Saturation Value"].inputs[2].default_value = random.randrange(0, 2.0) # random value for hsv
+    x = random.randint(0, len(cfg.model_paths)-1) # select random object to render, hide the rest
+    obj = mesh_list_objects[x]
+    obj.hide_render = False
+    mat = obj.active_material
+
+    if (not cfg.distractor_paths):  # an empty list is False
+        n = 0
     else:
-        mat.node_tree.nodes["Hue Saturation Value"].inputs[2].default_value = 1
+        n = random.randint(0, cfg.max_distractor_objects)
+    for j in range(n):
+        y = random.randint(0, len(cfg.distractor_paths)-1) # select random object to render, hide the rest
+        dis_obj = mesh_list_distractors[y]
+        dis_obj.hide_render = False
+
+        # position distractor objects
+        dis_obj.location.x = random.uniform(cfg.obj_location_xmin, cfg.obj_location_xmax)
+        dis_obj.location.y = random.uniform(cfg.obj_location_ymin, cfg.obj_location_ymax)
+        dis_obj.location.z = random.uniform(cfg.obj_location_zmin, cfg.obj_location_zmax)
+        rot_angle1 = random.uniform(cfg.cam_rotation_min, cfg.cam_rotation_max)
+        rot_angle2 = random.uniform(cfg.cam_rotation_min, cfg.cam_rotation_max)
+        rot_angle3 = random.uniform(cfg.cam_rotation_min, cfg.cam_rotation_max)
+        dis_obj.rotation_euler = (rot_angle1, rot_angle2, rot_angle3)
+    
+
+
+
 
     # random metallic material
     if (cfg.random_metallic_value):
@@ -365,80 +394,86 @@ def scene_cfg(camera, i):
         else:
             mat.node_tree.nodes["Principled BSDF"].inputs['Roughness'].default_value = cfg.roughness[x-1]
 
+    # random projector augmentation (point light with random color)
+    if (cfg.random_projector_colors):
+        if (random.random() >= 0.5):
+            setup_light(scene, light_number = 1, random_color = "projector")
+
 
     repeat = True
-
     while (repeat):
         # random camera position
         camera=place_camera(camera, radius=random.uniform(cfg.cam_rmin, cfg.cam_rmax), inclination=random.uniform(cfg.cam_incmin, cfg.cam_incmax), azimuth=random.uniform(cfg.cam_azimin, cfg.cam_azimax))
-        #camera.location.x = random.uniform(cfg.cam_xmin, cfg.cam_xmax)
-        #camera.location.y = random.uniform(cfg.cam_ymin, cfg.cam_ymax)
-        #camera.location.z = random.uniform(cfg.cam_zmin, cfg.cam_zmax)
-
-        #obj = bpy.data.objects['Object']
 
 
-        for j in range(1, 2):
-            obj = obj_list[x]
-            # random object pose
-            #empty_obj.location.x = random.uniform(cfg.obj_location_xmin, cfg.obj_location_xmax)
-            #empty_obj.location.y = random.uniform(cfg.obj_location_ymin, cfg.obj_location_ymax)
-            #empty_obj.location.z = random.uniform(cfg.obj_location_zmin, cfg.obj_location_zmax)
-            #empty_obj.rotation_euler = (random.uniform(cfg.obj_rotation_xmin*2*math.pi/360, cfg.obj_rotation_xmax*2*math.pi/360),
-		    #		random.uniform(cfg.obj_rotation_ymin*2*math.pi/360, cfg.obj_rotation_ymax*2*math.pi/360),
-			#		random.uniform(cfg.obj_rotation_zmin*2*math.pi/360, cfg.obj_rotation_zmax*2*math.pi/360))
 
-            #bpy.context.object.constraints["Track To"].influence = random.uniform(0.7, 1.0)
-            camera.constraints["Track To"].influence = random.uniform(0.7, 1.0)
+        empty_obj = bpy.data.objects["empty"]
+        # random object pose
+        #empty_obj.location.x = random.uniform(cfg.cam_obj_location_xmin, cfg.cam_obj_location_xmax)
+        #empty_obj.location.y = random.uniform(cfg.cam_obj_location_ymin, cfg.cam_obj_location_ymax)
+        #empty_obj.location.z = random.uniform(cfg.cam_obj_location_zmin, cfg.cam_obj_location_zmax)
+        obj.location.x = random.uniform(cfg.obj_location_xmin, cfg.obj_location_xmax)
+        obj.location.y = random.uniform(cfg.obj_location_ymin, cfg.obj_location_ymax)
+        obj.location.z = random.uniform(cfg.obj_location_zmin, cfg.obj_location_zmax)
+        rot_angle1 = random.uniform(cfg.cam_rotation_min, cfg.cam_rotation_max)
+        rot_angle2 = random.uniform(cfg.cam_rotation_min, cfg.cam_rotation_max)
+        rot_angle3 = random.uniform(cfg.cam_rotation_min, cfg.cam_rotation_max)
+        empty_obj.rotation_euler = (rot_angle1, rot_angle2, rot_angle3)
+        #empty_obj.rotation_euler = (random.uniform(cfg.obj_rotation_xmin*2*math.pi/360, cfg.obj_rotation_xmax*2*math.pi/360),
+	    #		random.uniform(cfg.obj_rotation_ymin*2*math.pi/360, cfg.obj_rotation_ymax*2*math.pi/360),
+		#		random.uniform(cfg.obj_rotation_zmin*2*math.pi/360, cfg.obj_rotation_zmax*2*math.pi/360))
 
-            # background objects location
-            #_loc = obj.location + Vector(get_sphere_coordinates(radius=random.uniform(0.3,1.5), inclination=random.uniform(0,math.pi), azimuth=random.uniform(0, 2*math.pi)))
-            #bpy.data.objects[clutter_obj].location = _loc
+        #bpy.context.object.constraints["Track To"].influence = random.uniform(0.7, 1.0)
+        #camera.constraints["Track To"].influence = random.uniform(0.7, 1.0)
 
-            # update blender object world_matrices!
-            bpy.context.view_layer.update()
+        # background objects location
+        #_loc = obj.location + Vector(get_sphere_coordinates(radius=random.uniform(0.3,1.5), inclination=random.uniform(0,math.pi), azimuth=random.uniform(0, 2*math.pi)))
+        #bpy.data.objects[clutter_obj].location = _loc
 
-            # Some point in 3D you want to project
-            #v = obj.location
-            # Projecting v with the camera
-            #K, RT = get_camera_KRT(camera)
-            #p = K @ (RT @ v)
-            #p /= p[2]
-            #p[1] = 512 - p[1]  # openCV frame
+        # update blender object world_matrices!
+        bpy.context.view_layer.update()
 
-            center = project_by_object_utils(camera, obj.location)  # object 2D center
+        # Some point in 3D you want to project
+        #v = obj.location
+        # Projecting v with the camera
+        #K, RT = get_camera_KRT(camera)
+        #p = K @ (RT @ v)
+        #p /= p[2]
+        #p[1] = 512 - p[1]  # openCV frame
 
-            # set background image
-            #if (cfg.use_bg_image):
-            #    bg_img = get_bg_image()
-            #else:
-            #    bg_img = None
+        center = project_by_object_utils(camera, obj.location)  # object 2D center
 
-            class_ = 0  # class label for object
-            labels = [class_]
-            labels.append(center[0])  # center x coordinate in image space
-            labels.append(center[1])  # center y coordinate in image space
-            corners = orderCorners(obj.bound_box)  # change order from blender to SSD paper
+        # set background image
+        #if (cfg.use_bg_image):
+        #    bg_img = get_bg_image()
+        #else:
+        #    bg_img = None
 
-            kps = []
-            repeat = False
-            for corner in corners:
-                p = obj.matrix_world @ Vector(corner)  # object space to world space
-                p = project_by_object_utils(camera, p)  # world space to image space
-                labels.append(p[0])
-                labels.append(p[1])
-                if (p[0] < 0 or p[0] > 1 or p[1] < 0 or p[1] > 1):
-                    v = 1 # v=1: labeled but not visible
-                else:
-                    v = 2 # v=2: labeled and visible
-                kps.append([p[0]*cfg.resolution_x, p[1]*cfg.resolution_y, v]) # 8 bounding box keypoints
+        class_ = 0  # class label for object
+        labels = [class_]
+        labels.append(center[0])  # center x coordinate in image space
+        labels.append(center[1])  # center y coordinate in image space
+        corners = util.orderCorners(obj.bound_box)  # change order from blender to SSD paper
 
-                # filter out objects outside of the image view
-                if (p[0] < -cfg.max_boundingbox or p[0] > (1+cfg.max_boundingbox) or
-                    p[1] < -cfg.max_boundingbox or p[1] > (1+cfg.max_boundingbox)):
-                    repeat = True
-                    print('Repeating this Scene CFG')
-                    print(p)
+        kps = []
+        repeat = False
+        for corner in corners:
+            p = obj.matrix_world @ Vector(corner)  # object space to world space
+            p = project_by_object_utils(camera, p)  # world space to image space
+            labels.append(p[0])
+            labels.append(p[1])
+            if (p[0] < 0 or p[0] > 1 or p[1] < 0 or p[1] > 1):
+                v = 1 # v=1: labeled but not visible
+            else:
+                v = 2 # v=2: labeled and visible
+            kps.append([p[0]*cfg.resolution_x, p[1]*cfg.resolution_y, v]) # 8 bounding box keypoints
+
+            # filter out objects outside of the image view
+            if (p[0] < -cfg.max_boundingbox or p[0] > (1+cfg.max_boundingbox) or
+                p[1] < -cfg.max_boundingbox or p[1] > (1+cfg.max_boundingbox)):
+                repeat = True
+                print('Repeating this Scene CFG')
+                print(p)
 
 
 
@@ -460,10 +495,10 @@ def scene_cfg(camera, i):
 
         kps.insert(0, [cfg.resolution_x*(max_x + min_x)/2, cfg.resolution_y*(max_y + min_y)/2, 2]) # center is the 1st keypoint
 
-        if cfg.NumberOfObjects == 1:
-            mode = 'wb'
-        else:
-            mode = 'ab'
+        #if cfg.NumberOfObjects == 1:
+        #    mode = 'wb'
+        #else:
+        #    mode = 'ab'
         if(not repeat):
             #fname = "DATASET/object/labels/{:06}.txt".format(i)
             #f = open(fname, mode)
@@ -494,9 +529,12 @@ def scene_cfg(camera, i):
 
 
 def setup():
+
     """one time config setup for blender."""
     bpy.ops.object.select_all(action='TOGGLE')
     camera = setup_camera()
+    #objs = bpy.data.objects
+    #objs.remove(objs["Light"], do_unlink=True)
 
     # delete Light
     bpy.ops.object.select_by_type(type='LIGHT')
@@ -514,6 +552,7 @@ def setup():
     cam_constraint = camera.constraints.new(type='TRACK_TO')
     cam_constraint.track_axis = 'TRACK_NEGATIVE_Z'
     cam_constraint.up_axis = 'UP_Y'
+    cam_constraint.use_target_z = True
     empty_obj = bpy.data.objects.new("empty", None)
     cam_constraint.target = empty_obj
 
@@ -554,7 +593,7 @@ def setup():
     else:
         depth_file_output = None
 
-    bpy.data.worlds["World"].light_settings.use_ambient_occlusion = True
+    #bpy.data.worlds["World"].light_settings.use_ambient_occlusion = True
 
     #  delete Cube from default blender scene
     bpy.data.objects['Cube'].select_set(True)
@@ -569,8 +608,13 @@ def setup():
         elif (cfg.model_paths[i][-4:] == '.ply' or cfg.model_paths[i][-4:] == '.PLY'):
             obj = importPLYobject(filepath=cfg.model_paths[i], scale=cfg.model_scale)
 
+    #  import Distractor Objects
+    NumberOfObjects = len(cfg.distractor_paths)
+    for i in range(NumberOfObjects):
+        obj = importOBJobject(filepath=cfg.distractor_paths[i], distractor=True)
+
     #  save Model real world Bounding Box for PnP algorithm
-    np.savetxt("model_bounding_box.txt", orderCorners(obj.bound_box))
+    np.savetxt("model_bounding_box.txt", util.orderCorners(obj.bound_box))
 
     #  import Environment Object (e.g. working desk)
     #if(not cfg.use_bg_image):
@@ -590,25 +634,29 @@ def setup():
 
 
 def render_cfg():
+    devices = bpy.context.preferences.addons["cycles"].preferences.get_devices() # refresh the list of devices
+    devices = devices[0]
+    for d in devices:
+        d["use"] = 1 # activate all devices
+        print("activating device: " + str(d["name"]))
     if(cfg.use_cycles):
         bpy.context.scene.render.engine = 'CYCLES'
         bpy.context.scene.cycles.samples = cfg.samples
         bpy.context.scene.cycles.max_bounces = 8
         bpy.context.scene.cycles.use_denoising = cfg.use_cycles_denoising
-        bpy.context.scene.cycles.adaptive_min_samples = 50
         bpy.context.scene.cycles.use_adaptive_sampling = cfg.use_adaptive_sampling
+        bpy.context.scene.cycles.adaptive_min_samples = 50
+        bpy.context.scene.cycles.adaptive_threshold = 0.001
         bpy.context.scene.cycles.denoiser = 'OPENIMAGEDENOISE' # Intel OpenImage AI denoiser on CPU
     else:
         bpy.context.scene.render.engine = 'BLENDER_EEVEE'
         bpy.context.scene.eevee.taa_render_samples = cfg.samples
     if(cfg.use_GPU):
-        bpy.context.scene.cycles.device = 'GPU'
+        #bpy.context.scene.render.tile_x = 64
+        #bpy.context.scene.render.tile_y = 64
         bpy.context.preferences.addons['cycles'].preferences.compute_device_type = "CUDA"
+        bpy.context.scene.cycles.device = 'GPU'
 
-        bpy.context.preferences.addons["cycles"].preferences.get_devices() # refresh the list of devices
-        for d in bpy.context.preferences.addons["cycles"].preferences.devices:
-            d["use"] = 1 # activate all devices
-            print("activating device: " + str(d["name"]))
 
 
     # https://docs.blender.org/manual/en/latest/files/media/image_formats.html
@@ -636,6 +684,15 @@ def render(camera, depth_file_output, test_flag):
         if (cfg.output_depth):
             depth_file_output.file_slots[0].path = bpy.context.scene.render.filepath + '_depth'
         bpy.ops.render.render(write_still=True, use_viewport=False)  # render current scene
+
+        for block in bpy.data.images: # delete loaded images (bg + hdri)
+            #if block.users == 0:
+                bpy.data.images.remove(block)
+        for block in bpy.data.lights: # delete lights
+            #if block.users == 0:
+                bpy.data.lights.remove(block)
+
+
         #if (cfg.use_bg_image):
         #    bpy.data.images.remove(bpy.data.images[bg_img])
     print('finished rendering')
@@ -649,6 +706,7 @@ def main():
     edit the config.py file to change configuration parameters
 
     """
+    random.seed(1)
     #cfg = cfg()
     parser = argparse.ArgumentParser()
     parser.add_argument("--python")

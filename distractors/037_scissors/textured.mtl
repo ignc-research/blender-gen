@@ -1,0 +1,13 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl material_0
+Ns 333.892579
+Ka 0.613636 0.613636 0.613636
+Kd 0.800000 0.800000 0.800000
+Ks 0.254545 0.254545 0.254545
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd /home/leon/git/python-blender-datagen/distractors/037_scissors/037_scissors_texture_map.png
