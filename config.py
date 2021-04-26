@@ -14,15 +14,14 @@ from math import pi
 class cfg:
   def __init__(self):
     #  PATHS
-    self.bg_paths = ['./bg']
+    self.bg_paths = ['./bg/real', './bg/coco/train2017', './bg/coco/train2017']
     self.environment_paths = ['./environment']
     #self.model_paths = ['./models/H8000.obj', './models/4000F_2.obj'] #3dbox0922marker_new.ply'  # list of filepath to objects
     #self.model_paths = ['./models/3dbox0922marker_new.ply']  # filepath to object
-    self.model_paths = ['./models/3dbox0922marker_new.ply']
-    #self.model_paths = ['./models/Pepper_Robot_Custom_Nonglossy_Nonshiny.obj']
+    self.model_paths = ['./models/H8000.obj']
     #self.distractor_paths = ['./distractors/048_hammer', './distractors/035_power_drill', './distractors/037_scissors', 
     #'./distractors/043_phillips_screwdriver', './distractors/025_mug', './distractors/036_wood_block', './distractors/044_flat_screwdriver']
-    self.distractor_paths = []
+    self.distractor_paths = ['./distractors/GlassCube', './distractors/MetallCube']
 
     #self.NumberOfObjects = 1
 
@@ -32,10 +31,10 @@ class cfg:
     self.depth_color_depth = '16'
 
     # AUGMENTATION
-    self.use_bg_image = True # use Background Images
+    self.use_bg_image = False # use Background Images
     self.use_environment_maps = True  # use 360° HDRI Panoramas
     self.emission_min = 0.5 # only for environment maps
-    self.emission_max = 2 # only for environment maps
+    self.emission_max = 4 # only for environment maps
     self.light_number_min = 1 # only for background images
     self.light_number_max = 3 # only for background images
     self.light_energymin = 20 # only for background images
@@ -72,16 +71,16 @@ class cfg:
     #self.cam_zmax = 1.3
 
     #  OBJECT POSITION
-    self.obj_location_xmin = -0.1 # translation in meters
-    self.obj_location_xmax = 0.1
-    self.obj_location_ymin = -0.1
-    self.obj_location_ymax = 0.1
-    self.obj_location_zmin = -0.1
-    self.obj_location_zmax = 0.1
+    self.obj_location_xmin = -0.2 # translation in meters
+    self.obj_location_xmax = 0.2
+    self.obj_location_ymin = -0.2
+    self.obj_location_ymax = 0.2
+    self.obj_location_zmin = -0.2
+    self.obj_location_zmax = 0.2
     self.cam_rotation_min = 0
     self.cam_rotation_max = 2*pi
 
-    self.max_distractor_objects = 0
+    self.max_distractor_objects = 3
 
     #self.obj_rotation_xmin = 0#-90 # euler rotation in degrees
     #self.obj_rotation_xmax = 0#90

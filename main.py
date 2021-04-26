@@ -123,6 +123,9 @@ def importOBJobject(filepath, distractor=False):
         #texture.image = bpy.data.images[-1]  # load latest image as texture
         texture.image = bpy.data.images[os.path.split(texture_path)[1]]
 
+    if (distractor == True and ('GlassCube' in file_path)):  # manually set Transmission for the GlassCube
+        bsdf.inputs['Transmission'].default_value = 1.0  # Transmission does not work automatically with material mtl files
+
     # save object material inputs
     cfg.metallic.append(bsdf.inputs['Metallic'].default_value)
     cfg.roughness.append(bsdf.inputs['Roughness'].default_value)
@@ -476,7 +479,7 @@ def scene_cfg(camera, i):
                 print(p)
 
 
-
+        P = camera.matrix_world.inverted() @ obj.matrix_world  # P=[RT] ground truth pose of the object in camera coordinates???
         min_x = np.min([labels[3], labels[5], labels[7], labels[9], labels[11], labels[13], labels[15], labels[17]])
         max_x = np.max([labels[3], labels[5], labels[7], labels[9], labels[11], labels[13], labels[15], labels[17]])
 
