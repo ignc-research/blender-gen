@@ -20,17 +20,17 @@ class cfg:
         #  PATHS
         self.out_folder = 'object'  # render images will be saved to DATASET/out_folder
         #self.bg_paths = ['./bg/real', './bg/coco/train2017', './bg/coco/train2017']
-        self.bg_paths = ['./bg/coco/train2017']
+        self.bg_paths = ['./bg']
         self.environment_paths = ['./environment']
         # self.model_paths = ['./models/H8000.obj', './models/4000F_2.obj'] #3dbox0922marker_new.ply'  # list of filepath to objects
         # self.model_paths = ['./models/3dbox0922marker_new.ply']  # filepath to object
-        self.model_paths = ['./models/H8000_simple.obj']
+        self.model_paths = ['./models/Suzanne.obj']
         self.compute_bbox = 'tight'  # choose 'tight' or 'fast' (tight uses all vertices to compute a tight bbox but it is slower)
         #self.distractor_paths = ['./distractors/048_hammer', './distractors/035_power_drill', './distractors/037_scissors',
         # './distractors/043_phillips_screwdriver', './distractors/025_mug', './distractors/036_wood_block', './distractors/044_flat_screwdriver']
-        #self.distractor_paths = ['./distractors/MetallCube','./distractors/MetallCube']
+        self.distractor_paths = ['./distractors/MetallCube']
         self.distractor_paths = []
-        self.max_distractor_objects = 2
+        self.max_distractor_objects = 0
 
         #self.NumberOfObjects = 1
 
@@ -95,7 +95,7 @@ class cfg:
         self.clip_start = 0.01
 
         #  RENDERING CONFIG
-        self.use_GPU = True
+        self.use_GPU = False
         self.use_cycles = True  # cycles or eevee
         self.use_cycles_denoising = False
         self.use_adaptive_sampling = True
@@ -104,7 +104,7 @@ class cfg:
         self.samples = 512  # render engine samples
 
         #  OUTPUT
-        self.numberOfRenders = 100  # how many rendered examples
+        self.numberOfRenders = 5  # how many rendered examples
 
         # temporary variables (dont change anything here)
         self.metallic = []
