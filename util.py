@@ -1,9 +1,10 @@
 import random
 
+
 def orderCorners(objBB):
     """change bounding box corner order."""
     # change bounding box order according to
-    # https://github.com/F2Wang/ObjectDatasetTools/blob/master/create_label_files.py
+    # https://github.com/Microsoft/singleshotpose/blob/master/label_file_creation.md
     out = []
     corners = [v[:] for v in objBB]  # list of tuples (x,y,z)
     out.append(corners[0])  # -1 -1 -1
@@ -16,6 +17,7 @@ def orderCorners(objBB):
     out.append(corners[6])  # 1 1 1
     return out
 
+
 def kelvin_to_rgb(K):
     """converts color temperature in Kelvin to RGB values according to
     http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/bbr_color.html"""
@@ -25,12 +27,12 @@ def kelvin_to_rgb(K):
              7000: (0.9337, 0.9150, 1.0000),
              8000: (0.7874, 0.8187, 1.0000),
              9000: (0.6693, 0.7541, 1.0000),
-             0:    (1,1,1)
-            }
+             0:    (1, 1, 1)
+             }
     rgb = table[K]
     return rgb
 
-def get_random_temperature_color():
+def get_random_temperature_color():  # 4K-9K test
         color_list = [(1.0000, 0.6636, 0.3583),  # 4000K
              (1.0000, 0.7992, 0.6045),  # 5000K
              (1.0000, 0.9019, 0.8473),  # 6000K
@@ -41,4 +43,18 @@ def get_random_temperature_color():
              ]
         idx = random.randint(0, len(color_list)-1)
         return color_list[idx]
-    
+
+
+#def get_random_temperature_color():
+#    color_list = [(1.0000, 0.2434, 0.0000),  # 1900K
+#                  (1.0000, 0.3786, 0.0790),  # 2600K
+#                  (1.0000, 0.4668, 0.1229),  # 2900K
+#                  (1.0000, 0.4970, 0.1879),  # 3200K
+#                  (1.0000, 0.8221, 0.6541),  # 5200K
+#                  (1.0000, 0.8286, 0.7187),  # 5400K
+#                  (1.0000, 0.9019, 0.8473),  # 6000K
+#                  (0.9337, 0.9150, 1.0000),  # 7000K
+#                  (0.3928, 0.5565, 1.0000)  # 20000K
+#                  ]
+#    idx = random.randint(0, len(color_list)-1)
+#    return color_list[idx]
