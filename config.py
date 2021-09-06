@@ -14,7 +14,7 @@ from math import pi
 
 class cfg:
     def __init__(self):
-        self.seed = 1000  # random seed for image generation. use None or an integer
+        self.seed = 1  # random seed for image generation. use None or an integer
         self.test = False
 
         #  PATHS
@@ -28,11 +28,15 @@ class cfg:
         self.compute_bbox = 'tight'  # choose 'tight' or 'fast' (tight uses all vertices to compute a tight bbox but it is slower)
         #self.distractor_paths = ['./distractors/048_hammer', './distractors/035_power_drill', './distractors/037_scissors',
         # './distractors/043_phillips_screwdriver', './distractors/025_mug', './distractors/036_wood_block', './distractors/044_flat_screwdriver']
-        self.distractor_paths = ['./distractors/MetallCube']
-        self.distractor_paths = []
-        self.max_distractor_objects = 0
+        self.distractor_paths = ['./distractors/Cube', './distractors/Cube', './distractors/Cube']
+        self.max_distractor_objects = 3
+
+        self.object_texture_path = './object_textures' #'./environment'# './textures_realistic' #'./textures'
+        self.distractor_texture_path = './distractor_textures'#'./bg/coco/train2017'
 
         #self.NumberOfObjects = 1
+        self.use_fps_keypoints = False # experimental feature for 6d pose estimation
+
 
         # DEPTH OUTPUT (not tested)
         self.output_depth = False
@@ -104,7 +108,7 @@ class cfg:
         self.samples = 512  # render engine samples
 
         #  OUTPUT
-        self.numberOfRenders = 5  # how many rendered examples
+        self.numberOfRenders = 20  # how many rendered examples
 
         # temporary variables (dont change anything here)
         self.metallic = []

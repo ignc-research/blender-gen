@@ -22,6 +22,7 @@ from mathutils import Vector, Matrix
 sys.path.append(os.getcwd())
 import util
 import config
+
 cfg = config.cfg()
 
 
@@ -73,16 +74,11 @@ def importPLYobject(filepath, scale):
     nodes = mat.node_tree.nodes
     mat_links = mat.node_tree.links
     bsdf = nodes.get("Principled BSDF")
-    #bsdf.inputs[7].default_value = cfg.roughness
+
     vcol = nodes.new(type="ShaderNodeVertexColor")
     vcol.layer_name = "Col"
-    #hsv = nodes.new(type="ShaderNodeHueSaturation")
-    # hsv.inputs[0].default_value = cfg.hsv_hue # hue
-    # hsv.inputs[1].default_value = cfg.hsv_saturation # saturation
-    # hsv.inputs[2].default_value = cfg.hsv_value # value
+
     mat_links.new(vcol.outputs['Color'], bsdf.inputs['Base Color'])
-    #mat_links.new(vcol.outputs['Color'], hsv.inputs['Color'])
-    #mat_links.new(hsv.outputs['Color'], bsdf.inputs['Base Color'])
 
     # save object material inputs
     cfg.metallic.append(bsdf.inputs['Metallic'].default_value)
@@ -118,20 +114,29 @@ def importOBJobject(filepath, distractor=False):
     obj = obj_objects[0]
     mat = obj.active_material
     nodes = mat.node_tree.nodes
+    mat_links = mat.node_tree.links
     bsdf = nodes.get("Principled BSDF")
 
-    if (distractor == True and texture_path):  # import distractor png texture
+    if (distractor == True and
+            texture_path):  # import original distractor png texture
         texture = nodes.get("Image Texture")
         bpy.data.images.load(
             texture_path)  # texture needs the same name as obj file
-        # texture.image = bpy.data.images[-1]  # load latest image as texture
         texture.image = bpy.data.images[os.path.split(texture_path)[1]]
 
-    if (distractor == True and
-        ('GlassCube'
-         in file_path)):  # manually set Transmission for the GlassCube
-        # Transmission does not work automatically with material mtl files
-        bsdf.inputs['Transmission'].default_value = 1.0
+    elif (distractor == True and len(cfg.distractor_texture_path) >
+          0):  # distractor with random texture
+        texture = nodes.new(type="ShaderNodeTexImage")  # new node
+        mat_links.new(
+            texture.outputs['Color'],
+            bsdf.inputs['Base Color'])  # link texture node to bsdf node
+
+    if (len(cfg.object_texture_path) > 0 and
+            distractor == False):  # use random image texture on object
+        texture = nodes.new(type="ShaderNodeTexImage")  # new node
+        mat_links.new(
+            texture.outputs['Color'],
+            bsdf.inputs['Base Color'])  # link texture node to bsdf node
 
     # save object material inputs
     cfg.metallic.append(bsdf.inputs['Metallic'].default_value)
@@ -364,7 +369,33 @@ def scene_cfg(camera, i):
         1)  # select random number of objects to render, hide the rest
     obj = mesh_list_objects[x]
     obj.hide_render = False
-    mat = obj.active_material
+    #mat = obj.active_material
+
+    # change distractor object texture
+    if (len(cfg.distractor_texture_path) > 0):
+        for distractor in mesh_list_distractors:
+            mat = distractor.active_material
+            nodes = mat.node_tree.nodes
+            texture = nodes.get("Image Texture")
+            texture_list = os.listdir(cfg.distractor_texture_path)
+            texture_path = texture_list[random.randint(0,
+                                                       len(texture_list) - 1)]
+            #texture.image = bpy.data.images[os.path.split(texture_path)[1]]
+            bpy.data.images.load(cfg.distractor_texture_path + '/' +
+                                 texture_path)
+            texture.image = bpy.data.images[texture_path]
+
+    # change object texture
+    if (len(cfg.object_texture_path) > 0):
+        mat = obj.active_material
+        nodes = mat.node_tree.nodes
+        texture = nodes.get("Image Texture")
+        texture_list = os.listdir(cfg.object_texture_path)
+        texture_path = texture_list[random.randint(0, len(texture_list) - 1)]
+        #texture.image = bpy.data.images[os.path.split(texture_path)[1]]
+        #  load object textures
+        bpy.data.images.load(cfg.object_texture_path + '/' + texture_path)
+        texture.image = bpy.data.images[texture_path]
 
     if (not cfg.distractor_paths):  # an empty list is False
         n = 0
@@ -460,6 +491,8 @@ def scene_cfg(camera, i):
         labels.append(center[1])  # center y coordinate in image space
         corners = util.orderCorners(
             obj.bound_box)  # change order from blender to SSD paper
+        if (cfg.use_fps_keypoints):
+            corners = np.loadtxt("fps.txt")
 
         kps = []
         repeat = False
@@ -534,10 +567,16 @@ def scene_cfg(camera, i):
         labels[2] = (max_y + min_y) / 2
 
         #  keypoints (kps) for 6D Pose Estimation
-        kps.insert(0, [
-            cfg.resolution_x * (max_x + min_x) / 2, cfg.resolution_y *
-            (max_y + min_y) / 2, 2
-        ])  # center is the 1st keypoint
+        #kps.insert(0, [
+        #    cfg.resolution_x * (max_x + min_x) / 2, cfg.resolution_y *
+        #    (max_y + min_y) / 2, 2
+        #])  # center is the 1st keypoint
+
+        if (cfg.use_fps_keypoints == False):
+            kps.insert(
+                0,
+                [cfg.resolution_x * center[0], cfg.resolution_y * center[1], 2
+                ])  # center is the 1st keypoint
 
         if (not repeat):
             # save COCO label
@@ -559,7 +598,7 @@ def scene_cfg(camera, i):
                 "iscrowd": 0,
                 "area": x_range * cfg.resolution_x * y_range * cfg.resolution_y,
                 "keypoints": kps,
-                "num_keypoints": 9
+                "num_keypoints": len(kps)
             }
 
     return bg_img, image, annotation
@@ -711,8 +750,8 @@ def render(camera, depth_file_output):
                               use_viewport=False)  # render current scene
 
         #for block in bpy.data.images:  # delete loaded images (bg + hdri)
-        #if (not cfg.test):
-        #bpy.data.images.remove(block)
+        #    if (not cfg.test):
+        #        bpy.data.images.remove(block)
         for block in bpy.data.lights:  # delete lights
             if (not cfg.test):
                 bpy.data.lights.remove(block)
