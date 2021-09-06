@@ -9,9 +9,10 @@ sudo ln -s /full/path/to/blender/blender-2.xx.x-linux64/blender /usr/local/bin/b
 ```
 
 ### background images
-If you want to use random COCO background images, download the COCO dataset (e.g. http://images.cocodataset.org/zips/train2017.zip) and unzip the images into the folder ./bg/coco
-If you want to use HDRI 360° environment maps, you can download them e.g. from https://hdrihaven.com/hdris/ and put them in the ./environment folder
+If you want to use random COCO background images, download the COCO dataset (http://images.cocodataset.org/zips/train2017.zip) and unzip the images into the folder ./bg/coco
+If you want to use HDRI 360° environment maps, you can download them (e.g. from https://polyhaven.com/hdris) and put them in the ./environment folder
 If you want to use real deployment background images, put them in the ./bg/real folder
+If you want to use random textures (e.g. from https://polyhaven.com/textures), put the images in the ./distractor_textures and ./object_textures folders
 
 
 ## usage
@@ -51,6 +52,8 @@ model_paths | List of paths to 3D CAD models.
 compute_bbox | Choose _'tight'_ or _'fast'_. _Tight_ uses all vertices to compute a tight bbox but it is slower. _Fast_ uses only the 3D Bounding Box corners.
 distractor_paths | List of paths to distracting foreground objects
 max_distractor_objects | Integer. Maximum number of  distracting foreground objects
+distractor_texture_path | String pointing to the textures folder for distracting foreground objects
+object_texture_path | String pointing to the textures folder for the 3D model that we want to detect
 use_bg_image | Boolean. Use background images (and not HDRI images) from the bg_paths folder
 use_environment_maps | Boolean. Use 360° HDRI images from the environment_paths folder. If use_bg_image is also True, only the HDRI lighting will be used.
 emission_min | HDRI minimum emission strength
@@ -96,8 +99,10 @@ numberOfRenders | Number of rendered images
 ### Getting Started with your own data
 If you want to use the default settings that were used in the paper, you can only change the following parameters:
 1. Place your 3D CAD model as an *.OBJ file with the material *.mtl file in the ./models folder. Blender can be used to convert to obj-format and create a mtl file. Make sure the model_paths parameter in the config file points to your object file.
-1. Place random background images in the ./bg folder
-1. Place random HDRI environment images in the ./environment folder
+1. Place random background images in the ./bg folder.
+1. Place random HDRI environment images in the ./environment folder.
+1. Place random texture images in the ./distractor_textures and ./object_textures folders.
+1. If you don't have a compatible GPU, set use_GPU to False in the config.py file.
 1. Set the test parameter in the config.py file to True, render one image and inspect the Blender scene.
 1. Change the camera parameters cam_* as needed in the config.py file.
 1. Set the test parameter to False and set numberOfRenders to the desired number of images. Start the rendering process.
