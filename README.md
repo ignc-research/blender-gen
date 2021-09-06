@@ -8,10 +8,11 @@ To bind the 'blender' command to the blender application execute the following c
 sudo ln -s /full/path/to/blender/blender-2.xx.x-linux64/blender /usr/local/bin/blender
 ```
 
-### background images
-If you want to use random COCO background images, download the COCO dataset (http://images.cocodataset.org/zips/train2017.zip) and unzip the images into the folder ./bg/coco
-If you want to use HDRI 360° environment maps, you can download them (e.g. from https://polyhaven.com/hdris) and put them in the ./environment folder
-If you want to use real deployment background images, put them in the ./bg/real folder
+### files
+If you want to use random COCO background images, download e.g. the COCO dataset (http://images.cocodataset.org/zips/train2017.zip) and unzip the images into the folder ./bg/coco
+
+If you want to use HDRI 360° environment maps, download them (e.g. from https://polyhaven.com/hdris) and put them in the ./environment folder
+
 If you want to use random textures (e.g. from https://polyhaven.com/textures), put the images in the ./distractor_textures and ./object_textures folders
 
 
@@ -39,7 +40,7 @@ blender --python main.py
 
 
 ## config.py
-This python file contains a simple configuration class to configure the Blender generation script. The following parameters must be adapted to your specific application.
+This python file contains a simple configuration class to configure the Blender generation script. The following parameters can be adapted to your specific application.
 
 Parameter | Description
 --------- | -----------
@@ -96,7 +97,7 @@ numberOfRenders | Number of rendered images
 
 
 
-### Getting Started with your own data
+### getting Started with your own data
 If you want to use the default settings that were used in the paper, you can only change the following parameters:
 1. Place your 3D CAD model as an *.OBJ file with the material *.mtl file in the ./models folder. Blender can be used to convert to obj-format and create a mtl file. Make sure the model_paths parameter in the config file points to your object file.
 1. Place random background images in the ./bg folder.
