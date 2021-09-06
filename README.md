@@ -102,7 +102,6 @@ If you want to use the default settings that were used in the paper, you can onl
 1. Place random background images in the ./bg folder.
 1. Place random HDRI environment images in the ./environment folder.
 1. Place random texture images in the ./distractor_textures and ./object_textures folders.
-1. If you don't have a compatible GPU, set use_GPU to False in the config.py file.
 1. Set the test parameter in the config.py file to True, render one image and inspect the Blender scene.
 1. Change the camera parameters cam_* as needed in the config.py file.
 1. Set the test parameter to False and set numberOfRenders to the desired number of images. Start the rendering process.

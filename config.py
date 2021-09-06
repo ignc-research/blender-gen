@@ -99,7 +99,7 @@ class cfg:
         self.clip_start = 0.01
 
         #  RENDERING CONFIG
-        self.use_GPU = False
+        self.use_GPU = True
         self.use_cycles = True  # cycles or eevee
         self.use_cycles_denoising = False
         self.use_adaptive_sampling = True
