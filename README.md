@@ -1,4 +1,4 @@
-# Generating Images with Physically Based Rendering
+# Generating Images with Physically Based Rendering for an Industrial Object Detection Task
 ![Screenshot](/example.png)
 
 ## installation
