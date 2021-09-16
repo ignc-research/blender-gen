@@ -1,4 +1,4 @@
-# python-blender-datagen
+# Generating Images with Physically Based Rendering
 ![Screenshot](/example.png)
 
 ## installation
