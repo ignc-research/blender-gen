@@ -109,6 +109,7 @@ If you want to use the default settings that were used in the paper, you can onl
 
 ### citation
 If you use this code, please cite our work:
+
 Eversberg, L.; Lambrecht, J. Generating Images with Physics-Based Rendering for an Industrial Object Detection Task: Realism versus Domain Randomization. Sensors 2021, 21, 7901. https://doi.org/10.3390/s21237901 
 
 
