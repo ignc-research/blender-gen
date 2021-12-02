@@ -1,4 +1,4 @@
-# Generating Images with Physically Based Rendering for an Industrial Object Detection Task
+# Generating Images with Physics-Based Rendering for an Industrial Object Detection Task
 ![Screenshot](/example.png)
 
 ## installation
@@ -97,7 +97,7 @@ numberOfRenders | Number of rendered images
 
 
 
-### getting Started with your own data
+### getting started with your own data
 If you want to use the default settings that were used in the paper, you can only change the following parameters:
 1. Place your 3D CAD model as an *.OBJ file with the material *.mtl file in the ./models folder. Blender can be used to convert to obj-format and create a mtl file. Make sure the model_paths parameter in the config file points to your object file.
 1. Place random background images in the ./bg folder.
@@ -106,6 +106,10 @@ If you want to use the default settings that were used in the paper, you can onl
 1. Set the test parameter in the config.py file to True, render one image and inspect the Blender scene.
 1. Change the camera parameters cam_* as needed in the config.py file.
 1. Set the test parameter to False and set numberOfRenders to the desired number of images. Start the rendering process.
+
+### citation
+If you use this code, please cite our work:
+Eversberg, L.; Lambrecht, J. Generating Images with Physics-Based Rendering for an Industrial Object Detection Task: Realism versus Domain Randomization. Sensors 2021, 21, 7901. https://doi.org/10.3390/s21237901 
 
 
 
