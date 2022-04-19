@@ -1,14 +1,21 @@
 # Generating Images with Physics-Based Rendering for an Industrial Object Detection Task
+This repo uses 3D-CAD models to generate synthetic training images for industrial deep-learning-based object detection tasks using Blenders ray-trace based render engine Cycles.
+We generate different images by randomizing lighting, background images, object texture and additional foreground objects. Additionally, we generate a JSON-file containing object detection annotations (bounding boxes) in the [COCO format](https://cocodataset.org/#format-data).
+
+If you use this code, please cite our work:
+
+> Eversberg, L.; Lambrecht, J. Generating Images with Physics-Based Rendering for an Industrial Object Detection Task: Realism versus Domain Randomization. Sensors 2021, 21, 7901. https://doi.org/10.3390/s21237901 
+> 
 ![Screenshot](/example.png)
 
-## installation
+## Installation
 Download and unpack Blender in a folder /path/to/blender/blender-2.xx.x-linux64/ from https://www.blender.org/download/
 To bind the 'blender' command to the blender application execute the following command in the terminal:
 ```
 sudo ln -s /full/path/to/blender/blender-2.xx.x-linux64/blender /usr/local/bin/blender
 ```
 
-### files
+### Files
 If you want to use random COCO background images, download e.g. the COCO dataset (http://images.cocodataset.org/zips/train2017.zip) and unzip the images into the folder ./bg/coco
 
 If you want to use HDRI 360° environment maps, download them (e.g. from https://polyhaven.com/hdris) and put them in the ./environment folder
@@ -16,21 +23,21 @@ If you want to use HDRI 360° environment maps, download them (e.g. from https:/
 If you want to use random textures (e.g. from https://polyhaven.com/textures), put the images in the ./distractor_textures and ./object_textures folders
 
 
-## usage
+## Usage
 
-### render images
+### Render images
 execute the following command in the terminal:
 ```
 blender --background --python main.py
 ```
 
-### show annotations (bounding box)
+### Show annotations (bounding box)
 After rendering images, execute the following command in the terminal:
 ```
 python show_annotations.py
 ```
 
-### render image and open blender scene
+### Render image and open blender scene
 To check the Blender scene setup, especially to configure the relationship between camera and object it is helpful to open the Blender scene after rendering.
 1. set the test flag in the config.py file to True
 1. start blender with the command line:
@@ -97,7 +104,7 @@ numberOfRenders | Number of rendered images
 
 
 
-### getting started with your own data
+### Getting started with your own data
 If you want to use the default settings that were used in the paper, you can only change the following parameters:
 1. Place your 3D CAD model as an *.OBJ file with the material *.mtl file in the ./models folder. Blender can be used to convert to obj-format and create a mtl file. Make sure the model_paths parameter in the config file points to your object file.
 1. Place random background images in the ./bg folder.
@@ -106,11 +113,6 @@ If you want to use the default settings that were used in the paper, you can onl
 1. Set the test parameter in the config.py file to True, render one image and inspect the Blender scene.
 1. Change the camera parameters cam_* as needed in the config.py file.
 1. Set the test parameter to False and set numberOfRenders to the desired number of images. Start the rendering process.
-
-### citation
-If you use this code, please cite our work:
-
-Eversberg, L.; Lambrecht, J. Generating Images with Physics-Based Rendering for an Industrial Object Detection Task: Realism versus Domain Randomization. Sensors 2021, 21, 7901. https://doi.org/10.3390/s21237901 
 
 
 
