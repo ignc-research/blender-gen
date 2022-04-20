@@ -30,7 +30,7 @@ execute the following command in the terminal:
 ```
 blender --background --python main.py
 ```
-![Screenshot](/blender_render.gif)
+[<img src="blender_render.gif" width="800"/>](/blender_render.gif)
 
 ### Show annotations (bounding box)
 After rendering images, execute the following command in the terminal:
@@ -46,7 +46,7 @@ To check the Blender scene setup, especially to configure the relationship betwe
 blender --python main.py
 ```
 
-![Screenshot](/blender_scene.png)
+[<img src="/blender_scene.png" width="400"/>](/blender_scene.png)
 
 ## config.py
 This python file contains a simple configuration class to configure the Blender generation script. The following parameters can be adapted to your specific application.
