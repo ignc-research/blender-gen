@@ -9,18 +9,18 @@ If you use this code, please cite our work:
 ![Screenshot](/example.png)
 
 ## Installation
-Download and unpack Blender in a folder /path/to/blender/blender-2.xx.x-linux64/ from https://www.blender.org/download/
+Download and unpack Blender in a folder /path/to/blender/blender-2.xx.x-linux64/ from [blender.org](https://www.blender.org/download/)
 To bind the 'blender' command to the blender application execute the following command in the terminal:
 ```
 sudo ln -s /full/path/to/blender/blender-2.xx.x-linux64/blender /usr/local/bin/blender
 ```
 
 ### Files
-If you want to use random COCO background images, download e.g. the COCO dataset (http://images.cocodataset.org/zips/train2017.zip) and unzip the images into the folder ./bg/coco
+If you want to use random COCO background images, download e.g. the [COCO dataset](http://images.cocodataset.org/zips/train2017.zip) and unzip the images into the folder ./bg/coco
 
-If you want to use HDRI 360° environment maps, download them (e.g. from https://polyhaven.com/hdris) and put them in the ./environment folder
+If you want to use HDRI 360° environment maps, download them (e.g. from [polyhaven.com](https://polyhaven.com/hdris)) and put them in the ./environment folder
 
-If you want to use random textures (e.g. from https://polyhaven.com/textures), put the images in the ./distractor_textures and ./object_textures folders
+If you want to use random textures (e.g. from [polyhaven.com](https://polyhaven.com/textures) or [ambientcg.com](https://ambientcg.com/list?category=&date=&createdUsing=&basedOn=&q=&method=&type=Material&sort=Popular)), put the images in the ./distractor_textures and ./object_textures folders
 
 
 ## Usage
