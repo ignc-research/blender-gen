@@ -15,12 +15,27 @@ To bind the 'blender' command to the blender application execute the following c
 sudo ln -s /full/path/to/blender/blender-2.xx.x-linux64/blender /usr/local/bin/blender
 ```
 
+### Getting Started
+If you want to use the default settings that were used in the paper, you can only change the following parameters:
+1. Place your 3D model (with UV map) as an *.OBJ file with the material *.mtl file in the ./models folder. Blender can be used to convert to obj-format, create a UV map and create a mtl file. Make sure the model_paths parameter in the config file points to your object file.
+1. Place random background images in the ./bg folder.
+1. Place random HDRI environment images in the ./environment folder.
+1. Place random texture images in the ./distractor_textures and ./object_textures folders.
+1. Set the test parameter in the config.py file to True, render one image and inspect the Blender scene.
+1. Change the camera parameters cam_* as needed in the config.py file.
+1. Set the test parameter to False and set numberOfRenders to the desired number of images. Start the rendering process.
+
 ### Files
 If you want to use random COCO background images, download e.g. the [COCO dataset](http://images.cocodataset.org/zips/train2017.zip) and unzip the images into the folder ./bg/coco
 
 If you want to use HDRI 360° environment maps, download them (e.g. from [polyhaven.com](https://polyhaven.com/hdris)) and put them in the ./environment folder
 
 If you want to use random textures (e.g. from [polyhaven.com](https://polyhaven.com/textures) or [ambientcg.com](https://ambientcg.com/list?category=&date=&createdUsing=&basedOn=&q=&method=&type=Material&sort=Popular)), put the images in the ./distractor_textures and ./object_textures folders
+
+
+### UV Maps
+The 3D models need to have UV maps so that Blender can change the texture. You can create UV maps in blender by going to UV editing --> select your object --> UV --> Smart UV Project or Unwrap
+[<img src="/UV_mapping.png" width="800"/>](/UV_mapping.png)
 
 
 ## Usage
@@ -103,19 +118,3 @@ resolution_x | Pixel resolution of the output image (width)
 resolution_y | Pixel resolution of the output image (height)
 samples | Render engine number of samples (sets cycles.samples)
 numberOfRenders | Number of rendered images
-
-
-
-### Getting started with your own data
-If you want to use the default settings that were used in the paper, you can only change the following parameters:
-1. Place your 3D CAD model as an *.OBJ file with the material *.mtl file in the ./models folder. Blender can be used to convert to obj-format and create a mtl file. Make sure the model_paths parameter in the config file points to your object file.
-1. Place random background images in the ./bg folder.
-1. Place random HDRI environment images in the ./environment folder.
-1. Place random texture images in the ./distractor_textures and ./object_textures folders.
-1. Set the test parameter in the config.py file to True, render one image and inspect the Blender scene.
-1. Change the camera parameters cam_* as needed in the config.py file.
-1. Set the test parameter to False and set numberOfRenders to the desired number of images. Start the rendering process.
-
-
-
-
