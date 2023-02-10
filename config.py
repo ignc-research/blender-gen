@@ -18,14 +18,14 @@ class cfg:
         self.test = False
 
         #  PATHS
-        self.out_folder = 'object'  # render images will be saved to DATASET/out_folder
+        self.out_folder = 'dataset'  # render images will be saved to DATASET/out_folder
         #self.bg_paths = ['./bg/real', './bg/coco/train2017', './bg/coco/train2017']
         self.bg_paths = ['./bg']
         self.environment_paths = ['./environment']
         # self.model_paths = ['./models/H8000.obj', './models/4000F_2.obj'] #3dbox0922marker_new.ply'  # list of filepath to objects
         # self.model_paths = ['./models/3dbox0922marker_new.ply']  # filepath to object
         self.model_paths = ['/data/object.ply']
-        self.compute_bbox = 'tight'  # choose 'tight' or 'fast' (tight uses all vertices to compute a tight bbox but it is slower)
+        self.compute_bbox = 'fast'  # choose 'tight' or 'fast' (tight uses all vertices to compute a tight bbox but it is slower)
         #self.distractor_paths = ['./distractors/048_hammer', './distractors/035_power_drill', './distractors/037_scissors',
         # './distractors/043_phillips_screwdriver', './distractors/025_mug', './distractors/036_wood_block', './distractors/044_flat_screwdriver']
         self.distractor_paths = ['./distractors/Cube', './distractors/Cube', './distractors/Cube']
@@ -59,7 +59,7 @@ class cfg:
         self.random_color = "None"  # choose "None", "temperature", "projector"
 
         # OBJECT COLOR (for PLY Files)
-        self.model_scale = 1  # model scale for PLY objects
+        self.model_scale = 0.5E-3  # model scale for PLY objects
         self.hsv_hue = 0.5  # changes hue of Hue Saturation Value Node, default 0.5
         self.hsv_saturation = 1  # changes saturation of Hue Saturation Value Node, default 1
         self.hsv_value = 1  # 0.35 # changes value of Hue Saturation Value Node, default 1
@@ -86,7 +86,7 @@ class cfg:
 
   
 
-        self.max_boundingbox = 0.1  # filter out objects with bbox < -x or > 1+x (a value of 0.1 means max. 10% occlusion)
+        self.max_boundingbox = 0.2  # filter out objects with bbox < -x or > 1+x (a value of 0.1 means max. 10% occlusion)
 
         # Camera
         self.cam_lens_unit = 'FOV'  # Choose 'FOV' or 'MILLIMETERS'
@@ -105,10 +105,10 @@ class cfg:
         self.use_adaptive_sampling = True
         self.resolution_x = 640  # pixel resolution
         self.resolution_y = 360
-        self.samples = 512  # render engine samples
+        self.samples = 256  # render engine samples
 
         #  OUTPUT
-        self.numberOfRenders = 20  # how many rendered examples
+        self.numberOfRenders = 2  # how many rendered examples
 
         # temporary variables (dont change anything here)
         self.metallic = []

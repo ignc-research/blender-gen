@@ -25,8 +25,11 @@ import config
 
 cfg = config.cfg()
 
+# def _print(*args, **kwargs):
+#     ...
+# print = _print
 
-def saveCOCOlabel(images, annotations, Kdict):
+def saveCOCOlabel(images, annotations, Kdict, path):
     # https://cocodataset.org/#format-data
     info = {
         "year": datetime.datetime.now().year,
@@ -52,7 +55,7 @@ def saveCOCOlabel(images, annotations, Kdict):
         "licenses": "",
     }
 
-    with open("/data/annotation_coco.json", "w") as write_file:
+    with open(os.path.join(path, "annotation_coco.json"), "w") as write_file:
         json.dump(coco, write_file, indent=2)
 
 
@@ -378,24 +381,26 @@ def scene_cfg(camera, i):
             nodes = mat.node_tree.nodes
             texture = nodes.get("Image Texture")
             texture_list = os.listdir(cfg.distractor_texture_path)
-            texture_path = texture_list[random.randint(0,
+            texture_file_path = texture_list[random.randint(0,
                                                        len(texture_list) - 1)]
             #texture.image = bpy.data.images[os.path.split(texture_path)[1]]
             bpy.data.images.load(cfg.distractor_texture_path + '/' +
-                                 texture_path)
-            texture.image = bpy.data.images[texture_path]
+                                 texture_file_path)
+            texture.image = bpy.data.images[texture_file_path]
 
     # change object texture
     if (len(cfg.object_texture_path) > 0):
         mat = obj.active_material
         nodes = mat.node_tree.nodes
         texture = nodes.get("Image Texture")
-        texture_list = os.listdir(cfg.object_texture_path)
-        texture_path = texture_list[random.randint(0, len(texture_list) - 1)]
-        #texture.image = bpy.data.images[os.path.split(texture_path)[1]]
-        #  load object textures
-        bpy.data.images.load(cfg.object_texture_path + '/' + texture_path)
-        texture.image = bpy.data.images[texture_path]
+        if texture:
+            texture_list = os.listdir(cfg.object_texture_path)
+            texture_file_path = texture_list[random.randint(0, len(texture_list) - 1)]
+            #texture.image = bpy.data.images[os.path.split(texture_path)[1]]
+            #  load object textures
+            bpy.data.images.load(cfg.object_texture_path + '/' + texture_file_path)
+            print(texture, nodes)
+            texture.image = bpy.data.images[texture_file_path]
 
     if (not cfg.distractor_paths):  # an empty list is False
         n = 0
@@ -512,7 +517,7 @@ def scene_cfg(camera, i):
             if (p[0] < -cfg.max_boundingbox or p[0] >
                 (1 + cfg.max_boundingbox) or p[1] < -cfg.max_boundingbox or
                     p[1] > (1 + cfg.max_boundingbox)):
-                repeat = True
+                repeat = True ##TODO WHY IS THIS REPEATING? BUG?
                 print('Repeating this Scene CFG')
                 print(p)
 
@@ -793,9 +798,12 @@ def main():
         filepath=scene_path,
         check_existing=False)  # save current scene as .blend file
     shutil.copy2('config.py',
-                 'data/' + cfg.out_folder)  # save config.py file
-    saveCOCOlabel(images, annotations,
-                  Kdict)  # save COCO annotation file at the end
+                 '/data/' + cfg.out_folder)  # save config.py file
+    saveCOCOlabel(images, 
+                  annotations,
+                  Kdict, 
+                  path='/data/' + cfg.out_folder
+                )  # save COCO annotation file at the end
 
     return True
 
