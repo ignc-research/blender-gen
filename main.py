@@ -693,10 +693,11 @@ def render_cfg():
     """setup Blenders render engine (EEVEE or CYCLES) once"""
     # refresh the list of devices
     devices = bpy.context.preferences.addons["cycles"].preferences.get_devices()
-    devices = devices[0]
-    for d in devices:
-        d["use"] = 1  # activate all devices
-        print("activating device: " + str(d["name"]))
+    if devices:
+        devices = devices[0]
+        for d in devices:
+            d["use"] = 1  # activate all devices
+            print("activating device: " + str(d["name"]))
     if (cfg.use_cycles):
         bpy.context.scene.render.engine = 'CYCLES'
         bpy.context.scene.cycles.samples = cfg.samples
