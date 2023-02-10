@@ -52,7 +52,7 @@ def saveCOCOlabel(images, annotations, Kdict):
         "licenses": "",
     }
 
-    with open("DATASET/annotation_coco.json", "w") as write_file:
+    with open("/data/annotation_coco.json", "w") as write_file:
         json.dump(coco, write_file, indent=2)
 
 
@@ -738,7 +738,7 @@ def render(camera, depth_file_output):
         cfg.numberOfRenders = 1
     for i in range(cfg.numberOfRenders):
 
-        bpy.context.scene.render.filepath = './DATASET/' + cfg.out_folder + '/images/{:06}.jpg'.format(
+        bpy.context.scene.render.filepath = '/data/' + cfg.out_folder + '/images/{:06}.jpg'.format(
             i)
         bg_img, image, annotation = scene_cfg(camera, i)
         images.append(image)
@@ -787,12 +787,13 @@ def main():
 
     images, annotations = render(camera, depth_file_output)  # render loop
     K, RT = get_camera_KRT(bpy.data.objects['Camera'])
-    Kdict = save_camera_matrix(K)  # save Camera Matrix to K.txt
+    Kdict = save_camera_matrix(K)  # save Camera Matrix to K.txt 
+    scene_path = os.path.join(os.getcwd(), 'scene.blend') # save current scene as .blend file, by providing the absolute path
     bpy.ops.wm.save_as_mainfile(
-        filepath="./scene.blend",
+        filepath=scene_path,
         check_existing=False)  # save current scene as .blend file
     shutil.copy2('config.py',
-                 'DATASET/' + cfg.out_folder)  # save config.py file
+                 'data/' + cfg.out_folder)  # save config.py file
     saveCOCOlabel(images, annotations,
                   Kdict)  # save COCO annotation file at the end
 

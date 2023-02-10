@@ -24,7 +24,7 @@ class cfg:
         self.environment_paths = ['./environment']
         # self.model_paths = ['./models/H8000.obj', './models/4000F_2.obj'] #3dbox0922marker_new.ply'  # list of filepath to objects
         # self.model_paths = ['./models/3dbox0922marker_new.ply']  # filepath to object
-        self.model_paths = ['./models/Suzanne.obj']
+        self.model_paths = ['/data/object.ply']
         self.compute_bbox = 'tight'  # choose 'tight' or 'fast' (tight uses all vertices to compute a tight bbox but it is slower)
         #self.distractor_paths = ['./distractors/048_hammer', './distractors/035_power_drill', './distractors/037_scissors',
         # './distractors/043_phillips_screwdriver', './distractors/025_mug', './distractors/036_wood_block', './distractors/044_flat_screwdriver']
