@@ -103,12 +103,12 @@ class cfg:
         self.use_cycles = True  # cycles or eevee
         self.use_cycles_denoising = False
         self.use_adaptive_sampling = True
-        self.resolution_x = 64  # pixel resolution
-        self.resolution_y = 36
-        self.samples = 1  # render engine samples
+        self.resolution_x = 640  # pixel resolution
+        self.resolution_y = 360
+        self.samples = 256  # render engine samples
 
         #  OUTPUT
-        self.numberOfRenders = 1  # how many rendered examples
+        self.numberOfRenders = 10  # how many rendered examples
 
         # temporary variables (dont change anything here)
         self.metallic = []

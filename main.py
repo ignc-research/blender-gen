@@ -781,6 +781,7 @@ def main():
 
     """
     random.seed(cfg.seed)
+    os.makedirs("./data", exist_ok=True)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--python")
