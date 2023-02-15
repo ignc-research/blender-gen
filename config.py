@@ -24,7 +24,7 @@ class cfg:
         self.environment_paths = ['./environment']
         # self.model_paths = ['./models/H8000.obj', './models/4000F_2.obj'] #3dbox0922marker_new.ply'  # list of filepath to objects
         # self.model_paths = ['./models/3dbox0922marker_new.ply']  # filepath to object
-        self.model_paths = ['/data/object.ply']
+        self.model_paths = ['./models/Suzanne.obj']
         self.compute_bbox = 'fast'  # choose 'tight' or 'fast' (tight uses all vertices to compute a tight bbox but it is slower)
         #self.distractor_paths = ['./distractors/048_hammer', './distractors/035_power_drill', './distractors/037_scissors',
         # './distractors/043_phillips_screwdriver', './distractors/025_mug', './distractors/036_wood_block', './distractors/044_flat_screwdriver']
@@ -103,12 +103,12 @@ class cfg:
         self.use_cycles = True  # cycles or eevee
         self.use_cycles_denoising = False
         self.use_adaptive_sampling = True
-        self.resolution_x = 640  # pixel resolution
-        self.resolution_y = 360
-        self.samples = 256  # render engine samples
+        self.resolution_x = 64  # pixel resolution
+        self.resolution_y = 36
+        self.samples = 1  # render engine samples
 
         #  OUTPUT
-        self.numberOfRenders = 2  # how many rendered examples
+        self.numberOfRenders = 1  # how many rendered examples
 
         # temporary variables (dont change anything here)
         self.metallic = []

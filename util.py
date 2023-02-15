@@ -5,7 +5,7 @@ def orderCorners(objBB):
     """change bounding box corner order."""
     # change bounding box order according to
     # https://github.com/Microsoft/singleshotpose/blob/master/label_file_creation.md
-    out = []
+    out = [objBB[i][:] for i in [0,1,3,2,4,5,7,6]]
     corners = [v[:] for v in objBB]  # list of tuples (x,y,z)
     out.append(corners[0])  # -1 -1 -1
     out.append(corners[1])  # -1 -1 1

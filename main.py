@@ -241,10 +241,10 @@ def save_camera_matrix(K):
         "cy": K[1][2],
     }
 
-    with open("camera_intrinsic.json", "w") as write_file:
+    with open("./data/camera_intrinsic.json", "w") as write_file:
         json.dump(Kdict, write_file)
         # save as json for better readability
-    np.savetxt("K.txt", K)
+    np.savetxt("./data/K.txt", K)
     return Kdict
 
 
@@ -686,7 +686,7 @@ def setup():
         obj = importOBJobject(filepath=cfg.distractor_paths[i], distractor=True)
 
     #  save Model real world Bounding Box for PnP algorithm
-    np.savetxt("model_bounding_box.txt", util.orderCorners(obj.bound_box))
+    np.savetxt("./data/model_bounding_box.txt", util.orderCorners(obj.bound_box))
 
     if (cfg.use_environment_maps):
         add_shader_on_world()  # used for HDR background image
@@ -743,7 +743,7 @@ def render(camera, depth_file_output):
         cfg.numberOfRenders = 1
     for i in range(cfg.numberOfRenders):
 
-        bpy.context.scene.render.filepath = '/data/' + cfg.out_folder + '/images/{:06}.jpg'.format(
+        bpy.context.scene.render.filepath = './data/' + cfg.out_folder + '/images/{:06}.jpg'.format(
             i)
         bg_img, image, annotation = scene_cfg(camera, i)
         images.append(image)
@@ -793,16 +793,15 @@ def main():
     images, annotations = render(camera, depth_file_output)  # render loop
     K, RT = get_camera_KRT(bpy.data.objects['Camera'])
     Kdict = save_camera_matrix(K)  # save Camera Matrix to K.txt 
-    scene_path = os.path.join(os.getcwd(), 'scene.blend') # save current scene as .blend file, by providing the absolute path
     bpy.ops.wm.save_as_mainfile(
-        filepath=scene_path,
+        filepath="./data/scene.blend",
         check_existing=False)  # save current scene as .blend file
     shutil.copy2('config.py',
-                 '/data/' + cfg.out_folder)  # save config.py file
+                 './data/' + cfg.out_folder)  # save config.py file
     saveCOCOlabel(images, 
                   annotations,
                   Kdict, 
-                  path='/data/' + cfg.out_folder
+                  path='./data/' + cfg.out_folder
                 )  # save COCO annotation file at the end
 
     return True
