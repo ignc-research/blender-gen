@@ -1,6 +1,7 @@
 **/coco/*
 **/images/*
 **/labels/*
-data
+data/intermediate
+data/output
 *.pyc
 /log.txt

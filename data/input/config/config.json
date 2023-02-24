@@ -1,0 +1,58 @@
+{
+
+    "input":{
+        "object": "Suzanne.obj",
+        "texture_object": "brick_floor_003_diffuse_1k.jpg",
+
+        "distractor":["Cube.obj"],
+        "texture_distractor":["bark_brown_02_diff_1k.jpg", "brick_floor_003_diffuse_1k.jpg"],
+
+        "bg":["pexels-pixabay-221047.jpg"],
+        "environment":[]
+
+    },
+
+    "output":{
+        "images": 100
+    },
+
+
+    "render":{
+        "camera":{
+            "cam_lens_unit": "FOV",
+            "cam_lens": 74.5,
+            "cam_sensor_height": 3.84,
+            "cam_sensor_width": 5.11,
+            "clip_start": 0.1,
+            "clip_end": 50
+        },
+
+        "resolution_x": 640,
+        "resolution_y": 360,
+
+        "model_scale": 0.5E-3,
+        "exposure": 40,
+        "compute_bbox": "fast",
+        "use_fps_keypoints": false,
+
+        "use_cycles": true,
+        "samples": 60,
+        "use_cycles_denoising": false,
+        "use_adaptive_sampling": false,
+        "use_GPU": true
+    },
+    
+    "random":{
+        "distractors": [1,2],
+
+        "x_pos": [-0.1, 0.1],
+        "y_pos": [-0.1, 0.1],
+        "z_pos": [0, 0.5],
+
+        "inc":[0, 1.5708],
+        "azi":[0, 1.5708],
+
+        "metallic": 0,
+        "roughness": 1
+    }
+}
