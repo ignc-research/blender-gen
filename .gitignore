@@ -3,3 +3,4 @@
 **/labels/*
 data
 *.pyc
+/log.txt
