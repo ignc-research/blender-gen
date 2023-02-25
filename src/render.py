@@ -410,7 +410,7 @@ def scene_cfg(camera, conf_obj, texture, inc, azi, metallic, roughness):
         else:
             v = 2  # v=2: labeled and visible
         # 8 bounding box keypoints
-        kps.append([p[0] * config["resolution_x"], p[1] * config["resolution_y"], v])
+        kps += [p[0] * config["resolution_x"], p[1] * config["resolution_y"], v]
 
     # P=[RT] ground truth pose of the object in camera coordinates???
     P = camera.matrix_world.inverted() @ obj.matrix_world
@@ -462,16 +462,10 @@ def scene_cfg(camera, conf_obj, texture, inc, azi, metallic, roughness):
     labels[2] = (max_y + min_y) / 2
 
     #  keypoints (kps) for 6D Pose Estimation
-    #kps.insert(0, [
-    #    cfg.resolution_x * (max_x + min_x) / 2, cfg.resolution_y *
-    #    (max_y + min_y) / 2, 2
-    #])  # center is the 1st keypoint
+    #kps = [cfg.resolution_x * (max_x + min_x) / 2, cfg.resolution_y * (max_y + min_y) / 2, 2] +kps
 
     if (config["use_fps_keypoints"] == False):
-        kps.insert(
-            0,
-            [config["resolution_x"] * center[0], config["resolution_y"] * center[1], 2
-            ])  # center is the 1st keypoint
+        kps = [config["resolution_x"] * center[0], config["resolution_y"] * center[1], 2] + kps  # center is the 1st keypoint
 
         # save COCO label
 
