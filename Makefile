@@ -6,8 +6,7 @@ configure:
 	python3.10 src/configure.py
 
 render:
-	blender --verbose 0 --background --python src/render.py
-
+	blender  --background --python src/render.py > /dev/null 2> &1
 merge:
 	python3.10 src/merge.py
 
