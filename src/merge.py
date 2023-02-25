@@ -3,6 +3,8 @@ import numpy as np
 import json
 import os
 import sys
+import click
+import grequests as requests
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -81,7 +83,15 @@ def merge(bg, obj, distractor):
     return img, trf
     
 
-def main():
+@click.command(context_settings=dict(
+    ignore_unknown_options=True,
+    allow_extra_args=True,
+))
+@click.option("--endpoint", default=None, help="http endpoint for sending current progress")
+@click.option("--coco-image-root", default="/data/output/dataset/", help="http endpoint for sending current progress")
+
+
+def main(endpoint, coco_image_root):
 
     merges = None
     with open("/data/intermediate/config/merge.json") as f:
@@ -103,16 +113,14 @@ def main():
     total = len(merges)
     digits = len(str(total))
 
-    print()
+    print(f"\r{0:0{digits}} / {total}", end="", flush=True)
 
     for i, conf in enumerate(merges):
-
-        print(f"\r{i:0{digits}} / {total}", end="", flush=True)
 
         merged, trf = merge(conf["bg"], conf["object"], conf["distractor"])
 
         id = f"{i:0{digits}}"
-        path = f"/data/output/dataset/{id}.png"
+        path = os.path.join(coco_image_root, f"{id}.png")
 
         cv.imwrite(path, merged)
 
@@ -143,6 +151,15 @@ def main():
             "keypoints": box["keypoints"],
             "num_keypoints": len(box["keypoints"])
         })
+
+        print(f"\r{i+1:0{digits}} / {total}", end="", flush=True)
+        
+        if not endpoint == None:
+            print(endpoint)
+            requests.post(endpoint, data=dict(
+                progress=i+1,
+                total=total
+            )).send()
 
     print()
     util.saveCOCOlabel(coco_img, coco_label, camera_K, "/data/output/")

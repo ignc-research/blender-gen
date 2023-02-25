@@ -13,7 +13,9 @@
     },
 
     "output":{
-        "images": 100
+        "images": 10,
+        "just_merge": 0.95,
+        "skew_angle:material": 4
     },
 
 

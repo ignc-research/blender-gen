@@ -17,6 +17,7 @@ import colorsys
 import shutil
 import glob
 from mathutils import Vector, Matrix
+import click
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -75,14 +76,15 @@ class Target:
                 else:
                     break;
             
+#maybe more useful in the future?
 class Object(Target):
-    model_path = "/data/input/models/object/"
-    texture_path = "/data/input/textures/object/"
+    model_path = "/data/input/models/"
+    texture_path = "/data/input/textures/"
     type = "object"
 
 class Distractor(Target):
-    model_path = "/data/input/models/distractor/"
-    texture_path = "/data/input/textures/distractor/"
+    model_path = "/data/input/models/"
+    texture_path = "/data/input/textures/"
     type = "distractor"
 
 # def _print(*args, **kwargs):
@@ -637,6 +639,10 @@ def render(camera, conf_obj, cat="unsorted", log=sys.stdout):
 
     return annotations
 
+@click.command(context_settings=dict(
+    ignore_unknown_options=True,
+    allow_extra_args=True,
+))
 
 def main():
     """
@@ -655,7 +661,8 @@ def main():
     with open("/data/intermediate/config/targets.json") as f:
         conf["targets"] = json.load(f)
     
-    log = open("/log.txt", "w")
+    #log = open("/log.txt", "w")
+    log = open(os.devnull, "w")
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--python")
