@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # to install packages with PIP into the blender python:
-# e.g. /PATH/TO/BLENDER/python/bin$ ./python3.7m -m pip install pandas
+# e.g. /PATH/TO/BLENDER/python/bin$ /python3.7m -m pip install pandas
 
 import bpy
 import bpy_extras
@@ -23,7 +23,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import util
 
 config = None
-with open("./data/intermediate/config/render.json") as f:
+with open("/data/intermediate/config/render.json") as f:
     config = json.load(f)
     config["metallic"] = []
     config["roughness"] = []
@@ -76,13 +76,13 @@ class Target:
                     break;
             
 class Object(Target):
-    model_path = "./data/input/models/object/"
-    texture_path = "./data/input/textures/object/"
+    model_path = "/data/input/models/object/"
+    texture_path = "/data/input/textures/object/"
     type = "object"
 
 class Distractor(Target):
-    model_path = "./data/input/models/distractor/"
-    texture_path = "./data/input/textures/distractor/"
+    model_path = "/data/input/models/distractor/"
+    texture_path = "/data/input/textures/distractor/"
     type = "distractor"
 
 # def _print(*args, **kwargs):
@@ -257,11 +257,11 @@ def save_camera_matrix(K):
         "cy": K[1][2],
     }
 
-    with open("./data/intermediate/render/camera_intrinsic.json", "w") as f:
+    with open("/data/intermediate/render/camera_intrinsic.json", "w") as f:
         json.dump(Kdict, f)
 
     # save as json for better readability
-    np.savetxt("./data/intermediate/render/K.txt", K)
+    np.savetxt("/data/intermediate/render/K.txt", K)
     return Kdict
 
 
@@ -560,7 +560,7 @@ def setup():
         obj = importOBJobject(filepath=cfg.distractor_paths[i], distractor=True) """
 
     #  save Model real world Bounding Box for PnP algorithm
-    #np.savetxt("./intermediate/model_bounding_box.txt", util.orderCorners(obj.bound_box))
+    #np.savetxt("/intermediate/model_bounding_box.txt", util.orderCorners(obj.bound_box))
 
     #add_shader_on_world()  # used for HDR background image
 
@@ -614,7 +614,7 @@ def render(camera, conf_obj, cat="unsorted", log=sys.stdout):
         log.write(f"\t{texture} - {inc} - {azi} - {metallic} - {roughness}\n")
         log.flush()
 
-        bpy.context.scene.render.filepath = f'./data/intermediate/render/renders/{cat}/{conf_obj.model}-{texture}-{inc}-{azi}-{metallic}-{roughness}.png'
+        bpy.context.scene.render.filepath = f'/data/intermediate/render/renders/{cat}/{conf_obj.model}-{texture}-{inc}-{azi}-{metallic}-{roughness}.png'
         annotation = scene_cfg(camera, conf_obj, texture, inc, azi, metallic, roughness)
         annotations.append(annotation)
 
@@ -649,13 +649,13 @@ def main():
 
     #load targets
 
-    os.makedirs("./data/intermediate/render/", exist_ok=True)
+    os.makedirs("/data/intermediate/render/", exist_ok=True)
 
     conf = {}
-    with open("./data/intermediate/config/targets.json") as f:
+    with open("/data/intermediate/config/targets.json") as f:
         conf["targets"] = json.load(f)
     
-    log = open("./log.txt", "w")
+    log = open("/log.txt", "w")
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--python")
@@ -686,17 +686,17 @@ def main():
         del obj
 
     #copy static backgrounds
-    os.makedirs("./data/intermediate/bg/", exist_ok=True)
-    shutil.copytree("./data/input/bg/static/", "./data/intermediate/bg/", dirs_exist_ok=True)
+    os.makedirs("/data/intermediate/bg/", exist_ok=True)
+    shutil.copytree("/data/input/bg/static/", "/data/intermediate/bg/", dirs_exist_ok=True)
 
     #render dyn backgrounds
     #
     
     K, RT = get_camera_KRT(bpy.data.objects['Camera'])
     Kdict = save_camera_matrix(K)  # save Camera Matrix to K.txt 
-    bpy.ops.wm.save_as_mainfile(filepath="./data/intermediate/render/scene.blend", check_existing=False)  # save current scene as .blend file
+    bpy.ops.wm.save_as_mainfile(filepath="/data/intermediate/render/scene.blend", check_existing=False)  # save current scene as .blend file
     
-    with open("./data/intermediate/render/annotations.json", "w") as f:
+    with open("/data/intermediate/render/annotations.json", "w") as f:
         json.dump(all_annotations, f)
     
     return True

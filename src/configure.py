@@ -15,19 +15,19 @@ def draw_samples(range, samples):
 def main():
 
     config = None
-    with open("./data/input/config/config.json") as f:
+    with open("/data/input/config/config.json") as f:
         config = json.load(f)
 
 
     pos_dof = isinstance(config["random"]["x_pos"], list) or isinstance(config["random"]["y_pos"], list) or isinstance(config["random"]["z_pos"], list)
 
-    os.makedirs("./data/intermediate/config/", exist_ok=True)
+    os.makedirs("/data/intermediate/config/", exist_ok=True)
 
     ###RENDER
 
     conf_render = config["render"]
 
-    with open("./data/intermediate/config/render.json", "w") as f:
+    with open("/data/intermediate/config/render.json", "w") as f:
         json.dump(conf_render, f)
 
 
@@ -79,7 +79,7 @@ def main():
             "roughness": targets["roughness"]
         }
 
-    with open("./data/intermediate/config/targets.json", "w") as f:
+    with open("/data/intermediate/config/targets.json", "w") as f:
         json.dump(conf_targets, f)
 
 
@@ -123,7 +123,7 @@ def main():
 
         conf_merge.append(merge)
 
-    with open("./data/intermediate/config/merge.json", "w") as f:
+    with open("/data/intermediate/config/merge.json", "w") as f:
         json.dump(conf_merge, f)
 
     print(f"Configured {total} renders for {len(conf_merge)} images")

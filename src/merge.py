@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import util
 
 cfg = None
-with open("./data/intermediate/config/render.json") as f:
+with open("/data/intermediate/config/render.json") as f:
     cfg = json.load(f)
 
 storage = None
@@ -31,16 +31,16 @@ def load(target: str, name: str):
     
     if target == "bg":
         storage[target][name] = cv.resize(
-            cv.imread(f"./data/intermediate/bg/{name}", cv.IMREAD_UNCHANGED),
+            cv.imread(f"/data/intermediate/bg/{name}", cv.IMREAD_UNCHANGED),
             (cfg["resolution_x"], cfg["resolution_y"]),
             interpolation=cv.INTER_AREA
         )
 
     elif target == "object":
-        storage[target][name] = cv.imread(f"./data/intermediate/render/renders/object/{name}", cv.IMREAD_UNCHANGED)
+        storage[target][name] = cv.imread(f"/data/intermediate/render/renders/object/{name}", cv.IMREAD_UNCHANGED)
 
     elif target == "distractor":
-        storage[target][name] = cv.imread(f"./data/intermediate/render/renders/distractor/{name}", cv.IMREAD_UNCHANGED)
+        storage[target][name] = cv.imread(f"/data/intermediate/render/renders/distractor/{name}", cv.IMREAD_UNCHANGED)
 
     return storage[target][name]
 
@@ -84,18 +84,18 @@ def merge(bg, obj, distractor):
 def main():
 
     merges = None
-    with open("./data/intermediate/config/merge.json") as f:
+    with open("/data/intermediate/config/merge.json") as f:
         merges = json.load(f)
         
     annotations = None
-    with open("./data/intermediate/render/annotations.json") as f:
+    with open("/data/intermediate/render/annotations.json") as f:
         annotations = json.load(f)
     
     camera_K = None
-    with open("./data/intermediate/render/camera_intrinsic.json") as f:
+    with open("/data/intermediate/render/camera_intrinsic.json") as f:
         camera_K = json.load(f)
     
-    os.makedirs("./data/output/dataset/", exist_ok=True)
+    os.makedirs("/data/output/dataset/", exist_ok=True)
 
     coco_img = []
     coco_label = []
@@ -112,7 +112,7 @@ def main():
         merged, trf = merge(conf["bg"], conf["object"], conf["distractor"])
 
         id = f"{i:0{digits}}"
-        path = f"./data/output/dataset/{id}.png"
+        path = f"/data/output/dataset/{id}.png"
 
         cv.imwrite(path, merged)
 
@@ -145,7 +145,7 @@ def main():
         })
 
     print()
-    util.saveCOCOlabel(coco_img, coco_label, camera_K, "./data/output/")
+    util.saveCOCOlabel(coco_img, coco_label, camera_K, "/data/output/")
     
 if __name__ == "__main__":
     main()

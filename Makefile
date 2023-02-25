@@ -12,5 +12,5 @@ merge:
 	python3.10 src/merge.py
 
 clean:
-	rm -rf data/intermediate/
-	rm -rf data/output/
+	rm -rf /data/intermediate/
+#	rm -rf /data/output/
