@@ -43,16 +43,18 @@ def saveCOCOlabel(images, annotations, Kdict):
         "images": images,
         "annotations": annotations,
         "categories": [{
-            "supercategory": "object_category",
-            "id": 0,
-            "name": "object",
+            "supercategory": "",
+            "id": 1,
+            "name": cfg.out_folder,
             "skeleton": [],
             "keypoints": []
         }],
         "licenses": "",
     }
 
-    with open("DATASET/annotation_coco.json", "w") as write_file:
+    filename = "DATASET/" + cfg.out_folder + "/annotations/instances_default.json"
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, "w") as write_file:
         json.dump(coco, write_file, indent=2)
 
 
@@ -117,19 +119,19 @@ def importOBJobject(filepath, distractor=False):
     mat_links = mat.node_tree.links
     bsdf = nodes.get("Principled BSDF")
 
-    if (distractor == True and
-            texture_path):  # import original distractor png texture
+    if (distractor == True and texture_path):  # import original distractor png texture
         texture = nodes.get("Image Texture")
         bpy.data.images.load(
             texture_path)  # texture needs the same name as obj file
         texture.image = bpy.data.images[os.path.split(texture_path)[1]]
 
-    elif (distractor == True and len(cfg.distractor_texture_path) >
-          0):  # distractor with random texture
+    elif (distractor  == True and 
+            len(cfg.distractor_texture_path) > 0):  # distractor with random texture
         texture = nodes.new(type="ShaderNodeTexImage")  # new node
         mat_links.new(
             texture.outputs['Color'],
             bsdf.inputs['Base Color'])  # link texture node to bsdf node
+
 
     if (len(cfg.object_texture_path) > 0 and
             distractor == False):  # use random image texture on object
@@ -492,7 +494,7 @@ def scene_cfg(camera, i):
         corners = util.orderCorners(
             obj.bound_box)  # change order from blender to SSD paper
         if (cfg.use_fps_keypoints):
-            corners = np.loadtxt("fps.txt")
+            corners = np.loadtxt("fps_CAD.txt")
 
         kps = []
         repeat = False
@@ -513,8 +515,22 @@ def scene_cfg(camera, i):
                 (1 + cfg.max_boundingbox) or p[1] < -cfg.max_boundingbox or
                     p[1] > (1 + cfg.max_boundingbox)):
                 repeat = True
-                print('Repeating this Scene CFG')
-                print(p)
+                #print('Repeating this Scene CFG')
+                #print(p)
+
+        # check if object is occluded from a distractor
+        location = scene.ray_cast(bpy.context.evaluated_depsgraph_get(), camera.location, (obj.location - camera.location).normalized())
+        #print(location[4].name)
+        try:
+            # ray hit something
+            if ('Object' not in location[4].name):
+                repeat = True
+                #print('Repeating this Scene CFG')
+        except:
+            # ray hit nothing
+            repeat = True
+
+
 
         # P=[RT] ground truth pose of the object in camera coordinates???
         P = camera.matrix_world.inverted() @ obj.matrix_world
@@ -582,7 +598,7 @@ def scene_cfg(camera, i):
             # save COCO label
             image = {
                 "id": i,
-                "file_name": "object/images/{:06}".format(i) + '.jpg',
+                "file_name": "{:06}".format(i) + '.jpg',
                 "height": cfg.resolution_y,
                 "width": cfg.resolution_x,
             }
@@ -593,7 +609,7 @@ def scene_cfg(camera, i):
                     min_x * cfg.resolution_x, min_y * cfg.resolution_y,
                     x_range * cfg.resolution_x, y_range * cfg.resolution_y
                 ],
-                "category_id": 0,
+                "category_id": 1,
                 "segmentation": [],
                 "iscrowd": 0,
                 "area": x_range * cfg.resolution_x * y_range * cfg.resolution_y,

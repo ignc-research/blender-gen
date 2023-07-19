@@ -7,7 +7,7 @@ import matplotlib.image as mpimg
 import random
 import json
 
-with open('DATASET/annotation_coco.json') as f:
+with open('DATASET/object/annotations/instances_default.json') as f:
   data = json.load(f)
 
 images = data['images']
@@ -20,7 +20,7 @@ while(True):
 
     bbox = labels[idx]['bbox']
 
-    I = mpimg.imread('DATASET/'+img_name)  # load rendered image
+    I = mpimg.imread('DATASET/object/images/'+img_name)  # load rendered image
 
     fig,ax = plt.subplots(1)
     ax.imshow(I)
@@ -38,4 +38,5 @@ while(True):
         circle = patches.Circle((x,y), radius=3)
         ax.add_patch(circle)
     plt.show()
+    
 
