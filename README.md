@@ -54,7 +54,7 @@ python show_annotations.py
 ```
 
 Annotations and images can be imported in CVAT using the COCO 1.0 format.
-[<img src="/blender_scene.png" width="800"/>](/CVAT_import.jpg)
+[<img src="/CVAT_import.jpg" width="800"/>](/CVAT_import.jpg)
 
 
 ### Render image and open blender scene
