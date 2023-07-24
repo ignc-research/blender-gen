@@ -53,6 +53,10 @@ After rendering images, execute the following command in the terminal:
 python show_annotations.py
 ```
 
+Annotations and images can be imported in CVAT using the COCO 1.0 format.
+[<img src="/blender_scene.png" width="800"/>](/CVAT_import.jpg)
+
+
 ### Render image and open blender scene
 To check the Blender scene setup, especially to configure the relationship between camera and object it is helpful to open the Blender scene after rendering.
 1. set the test flag in the config.py file to True
