@@ -53,7 +53,7 @@ After rendering images, execute the following command in the terminal:
 python show_annotations.py
 ```
 
-Annotations and images can be imported in CVAT using the COCO 1.0 format.
+Annotations and images can be imported in [CVAT](https://github.com/opencv/cvat) using the COCO 1.0 format.
 [<img src="/CVAT_import.jpg" width="800"/>](/CVAT_import.jpg)
 
 
