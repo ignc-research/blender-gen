@@ -105,11 +105,6 @@ def importOBJobject(filepath, distractor=False):
     print("importing model with axis_forward=Y, axis_up=Z")
 
     obj_objects = bpy.context.selected_objects[:]
-    #ctx = bpy.context.copy()
-    #ctx['active_object'] = obj_objects[0]
-    #ctx['selected_objects'] = obj_objects
-    # bpy.ops.object.join(ctx)  # join multiple elements into one element
-    # bpy.ops.object.join(obj_objects)  # join multiple elements into one eleme
     obj_objects[0].name = name  # set object name
 
     # get BSDF material node
@@ -196,9 +191,6 @@ def setup_camera():
     # CAMERA CONFIG
     camera.data.sensor_height = cfg.cam_sensor_height
     camera.data.sensor_width = cfg.cam_sensor_width
-    #width = cfg.resolution_x
-    #height = cfg.resolution_y
-    # camera.data.lens_unit = 'FOV'#'MILLIMETERS'
     if cfg.cam_lens_unit == 'FOV':
         camera.data.lens_unit = 'FOV'
         camera.data.angle = (cfg.cam_fov / 360) * 2 * math.pi
@@ -382,7 +374,6 @@ def scene_cfg(camera, i):
             texture_list = os.listdir(cfg.distractor_texture_path)
             texture_path = texture_list[random.randint(0,
                                                        len(texture_list) - 1)]
-            #texture.image = bpy.data.images[os.path.split(texture_path)[1]]
             bpy.data.images.load(cfg.distractor_texture_path + '/' +
                                  texture_path)
             texture.image = bpy.data.images[texture_path]
@@ -394,7 +385,6 @@ def scene_cfg(camera, i):
         texture = nodes.get("Image Texture")
         texture_list = os.listdir(cfg.object_texture_path)
         texture_path = texture_list[random.randint(0, len(texture_list) - 1)]
-        #texture.image = bpy.data.images[os.path.split(texture_path)[1]]
         #  load object textures
         bpy.data.images.load(cfg.object_texture_path + '/' + texture_path)
         texture.image = bpy.data.images[texture_path]
@@ -520,7 +510,6 @@ def scene_cfg(camera, i):
 
         # check if object is occluded from a distractor
         location = scene.ray_cast(bpy.context.evaluated_depsgraph_get(), camera.location, (obj.location - camera.location).normalized())
-        #print(location[4].name)
         try:
             # ray hit something
             if ('Object' not in location[4].name):
@@ -530,9 +519,6 @@ def scene_cfg(camera, i):
             # ray hit nothing
             repeat = True
 
-
-
-        # P=[RT] ground truth pose of the object in camera coordinates???
         P = camera.matrix_world.inverted() @ obj.matrix_world
 
         # compute bounding box either with 3D bbox or by going through vertices
