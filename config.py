@@ -6,11 +6,7 @@ Created on Thu Jul 23 18:35:21 2020
 @author: leon
 """
 
-#from easydict import EasyDict
 from math import pi
-
-#self = EasyDict()
-
 
 class cfg:
     def __init__(self):
