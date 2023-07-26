@@ -83,8 +83,8 @@ def importPLYobject(filepath, scale):
     mat_links.new(vcol.outputs['Color'], bsdf.inputs['Base Color'])
 
     # save object material inputs
-    cfg.metallic.append(bsdf.inputs['Metallic'].default_value)
-    cfg.roughness.append(bsdf.inputs['Roughness'].default_value)
+    cfg._metallic.append(bsdf.inputs['Metallic'].default_value)
+    cfg._roughness.append(bsdf.inputs['Roughness'].default_value)
 
     return obj
 
@@ -136,8 +136,8 @@ def importOBJobject(filepath, distractor=False):
             bsdf.inputs['Base Color'])  # link texture node to bsdf node
 
     # save object material inputs
-    cfg.metallic.append(bsdf.inputs['Metallic'].default_value)
-    cfg.roughness.append(bsdf.inputs['Roughness'].default_value)
+    cfg._metallic.append(bsdf.inputs['Metallic'].default_value)
+    cfg._roughness.append(bsdf.inputs['Roughness'].default_value)
 
     return obj
 
@@ -418,7 +418,7 @@ def scene_cfg(camera, i):
                 'Metallic'].default_value = random.random()
         else:
             mat.node_tree.nodes["Principled BSDF"].inputs[
-                'Metallic'].default_value = cfg.metallic[x - 1]
+                'Metallic'].default_value = cfg._metallic[x - 1]
 
     # random roughness material
     if (cfg.random_roughness_value):
@@ -427,7 +427,7 @@ def scene_cfg(camera, i):
                 'Roughness'].default_value = random.random()
         else:
             mat.node_tree.nodes["Principled BSDF"].inputs[
-                'Roughness'].default_value = cfg.roughness[x - 1]
+                'Roughness'].default_value = cfg._roughness[x - 1]
 
     # random projector augmentation (point light with random color)
     if (cfg.random_color == "projector"):
