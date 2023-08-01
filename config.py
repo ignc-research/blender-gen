@@ -30,7 +30,7 @@ class cfg:
         self.use_bg_image = True  # use Background Images
         self.use_environment_maps = True  # use 360° HDRI Panoramas
         self.emission_min = 1  # only for environment maps
-        self.emission_max = 8  # only for environment maps
+        self.emission_max = 5  # only for environment maps
         self.light_number_min = 1  # only for background images
         self.light_number_max = 3  # only for background images
         self.light_energymin = 20  # only for background images
@@ -50,7 +50,7 @@ class cfg:
         self.cam_rmin = 0.3  # minimum camera distance
         self.cam_rmax = 1.1  # maximum camera distance
         self.cam_incmin = 0
-        self.cam_incmax = pi/2  # pi*2/3
+        self.cam_incmax = pi/2
         self.cam_azimin = 0
         self.cam_azimax = 2*pi
 
@@ -85,8 +85,4 @@ class cfg:
         self.samples = 512  # render engine samples
 
         #  OUTPUT
-        self.numberOfRenders = 10  # how many rendered examples
-
-        # temporary variables (dont change anything here)
-        self._metallic = []
-        self._roughness = []
+        self.number_of_renders = 10  # how many rendered examples

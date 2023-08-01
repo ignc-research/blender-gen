@@ -23,7 +23,7 @@ If you want to use the default settings that were used in the paper, you can onl
 1. Place random texture images in the ./distractor_textures and ./object_textures folders.
 1. Set the test parameter in the config.py file to True, render one image and inspect the Blender scene.
 1. Change the camera parameters cam_* as needed in the config.py file.
-1. Set the test parameter to False and set numberOfRenders to the desired number of images. Start the rendering process.
+1. Set the test parameter to False and set number_of_renders to the desired number of images. Start the rendering process.
 
 ### Files
 If you want to use random COCO background images, download e.g. the [COCO dataset](http://images.cocodataset.org/zips/train2017.zip) and unzip the images into the folder ./bg/coco
@@ -121,4 +121,4 @@ use_adaptive_sampling | Boolean. If True, adaptive sampling is used (https://doc
 resolution_x | Pixel resolution of the output image (width)
 resolution_y | Pixel resolution of the output image (height)
 samples | Render engine number of samples (sets cycles.samples)
-numberOfRenders | Number of rendered images
+number_of_renders | Number of rendered images

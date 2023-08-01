@@ -24,8 +24,10 @@ import config
 
 
 class BlenderGen:
-    def __init__(self):
-        self.cfg = config.cfg()
+    def __init__(self, cfg = config.cfg()):
+        self.cfg = cfg
+        self._roughness = []
+        self._metallic = []
 
     def save_coco_label(self, images, annotations, Kdict):
         # https://cocodataset.org/#format-data
@@ -86,8 +88,8 @@ class BlenderGen:
         mat_links.new(vcol.outputs["Color"], bsdf.inputs["Base Color"])
 
         # save object material inputs
-        self.cfg._metallic.append(bsdf.inputs["Metallic"].default_value)
-        self.cfg._roughness.append(bsdf.inputs["Roughness"].default_value)
+        self._metallic.append(bsdf.inputs["Metallic"].default_value)
+        self._roughness.append(bsdf.inputs["Roughness"].default_value)
 
         return obj
 
@@ -142,8 +144,8 @@ class BlenderGen:
             )  # link texture node to bsdf node
 
         # save object material inputs
-        self.cfg._metallic.append(bsdf.inputs["Metallic"].default_value)
-        self.cfg._roughness.append(bsdf.inputs["Roughness"].default_value)
+        self._metallic.append(bsdf.inputs["Metallic"].default_value)
+        self._roughness.append(bsdf.inputs["Roughness"].default_value)
 
         return obj
 
@@ -438,7 +440,7 @@ class BlenderGen:
             else:
                 mat.node_tree.nodes["Principled BSDF"].inputs[
                     "Metallic"
-                ].default_value = self.cfg._metallic[x - 1]
+                ].default_value = self._metallic[x - 1]
 
         # random roughness material
         if self.cfg.random_roughness_value:
@@ -449,7 +451,7 @@ class BlenderGen:
             else:
                 mat.node_tree.nodes["Principled BSDF"].inputs[
                     "Roughness"
-                ].default_value = self.cfg._roughness[x - 1]
+                ].default_value = self._roughness[x - 1]
 
         # random projector augmentation (point light with random color)
         if self.cfg.random_color == "projector":
@@ -833,8 +835,8 @@ class BlenderGen:
 
         #  render loop
         if self.cfg.test:
-            self.cfg.numberOfRenders = 1
-        for i in range(self.cfg.numberOfRenders):
+            self.cfg.number_of_renders = 1
+        for i in range(self.cfg.number_of_renders):
             bpy.context.scene.render.filepath = (
                 "./DATASET/" + self.cfg.out_folder + "/images/{:06}.jpg".format(i)
             )
@@ -856,11 +858,11 @@ class BlenderGen:
 
         end_time = datetime.datetime.now()
         dt = end_time - start_time
-        secondsPerRender = dt.seconds / self.cfg.numberOfRenders
+        seconds_per_render = dt.seconds / self.cfg.number_of_renders
         print("---------------")
         print("finished rendering")
         print("total render time (hh:mm:ss): " + str(dt))
-        print("average seconds per image: " + str(secondsPerRender))
+        print("average seconds per image: " + str(seconds_per_render))
 
         return images, annotations
 
@@ -892,5 +894,5 @@ class BlenderGen:
 
 
 if __name__ == "__main__":
-    Generator = BlenderGen()
+    Generator = BlenderGen(cfg = config.cfg())
     Generator.run()
