@@ -20,11 +20,9 @@ from mathutils import Vector, Matrix
 
 sys.path.append(os.getcwd())
 import util
-import config
-
 
 class BlenderGen:
-    def __init__(self, cfg = config.cfg()):
+    def __init__(self, cfg):
         self.cfg = cfg
         self._roughness = []
         self._metallic = []
@@ -693,6 +691,7 @@ class BlenderGen:
 
     def setup(self):
         """one time config setup for blender."""
+        bpy.ops.wm.read_factory_settings()
 
         bpy.ops.object.select_all(action="TOGGLE")
         camera = self.setup_camera()
@@ -894,5 +893,6 @@ class BlenderGen:
 
 
 if __name__ == "__main__":
+    import config
     Generator = BlenderGen(cfg = config.cfg())
     Generator.run()
