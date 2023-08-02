@@ -752,8 +752,8 @@ class BlenderGen:
         bpy.ops.object.delete()
 
         #  import model object
-        NumberOfObjects = len(self.cfg.model_paths)
-        for i in range(NumberOfObjects):
+        number_of_objects = len(self.cfg.model_paths)
+        for i in range(number_of_objects):
             if (
                 self.cfg.model_paths[i][-4:] == ".obj"
                 or self.cfg.model_paths[i][-4:] == ".OBJ"
@@ -768,8 +768,8 @@ class BlenderGen:
                 )
 
         #  import distractor objects
-        NumberOfObjects = len(self.cfg.distractor_paths)
-        for i in range(NumberOfObjects):
+        number_of_objects = len(self.cfg.distractor_paths)
+        for i in range(number_of_objects):
             obj = self.import_obj_object(
                 filepath=self.cfg.distractor_paths[i], distractor=True
             )
