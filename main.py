@@ -21,6 +21,7 @@ from mathutils import Vector, Matrix
 sys.path.append(os.getcwd())
 import util
 
+
 class BlenderGen:
     def __init__(self, cfg):
         self.cfg = cfg
@@ -31,7 +32,7 @@ class BlenderGen:
         # https://cocodataset.org/#format-data
         info = {
             "year": datetime.datetime.now().year,
-            "version": "1.0",
+            "version": "1.1",
             "description": "Synthetic Dataset created with Blender Python script",
             "contributor": "IGNC",
             "url": "https://www.ignc.tu-berlin.de",
@@ -659,6 +660,9 @@ class BlenderGen:
                     ],
                 )  # center is the 1st keypoint
 
+            if self.cfg.use_keypoints == False:
+                kps = []
+
             if not repeat:
                 # save COCO label
                 image = {
@@ -671,18 +675,21 @@ class BlenderGen:
                     "id": i,
                     "image_id": i,
                     "bbox": [
-                        min_x * self.cfg.resolution_x,
-                        min_y * self.cfg.resolution_y,
-                        x_range * self.cfg.resolution_x,
-                        y_range * self.cfg.resolution_y,
+                        round(min_x * self.cfg.resolution_x, 2),
+                        round(min_y * self.cfg.resolution_y, 2),
+                        round(x_range * self.cfg.resolution_x, 2),
+                        round(y_range * self.cfg.resolution_y, 2),
                     ],
                     "category_id": 1,
                     "segmentation": [],
                     "iscrowd": 0,
-                    "area": x_range
-                    * self.cfg.resolution_x
-                    * y_range
-                    * self.cfg.resolution_y,
+                    "area": round(
+                        x_range
+                        * self.cfg.resolution_x
+                        * y_range
+                        * self.cfg.resolution_y,
+                        2,
+                    ),
                     "keypoints": kps,
                     "num_keypoints": len(kps),
                 }
@@ -894,5 +901,6 @@ class BlenderGen:
 
 if __name__ == "__main__":
     import config
-    Generator = BlenderGen(cfg = config.cfg())
+
+    Generator = BlenderGen(cfg=config.cfg())
     Generator.run()

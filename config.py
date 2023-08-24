@@ -20,6 +20,7 @@ class cfg:
         self.object_texture_path = './object_textures'
         self.distractor_texture_path = './distractor_textures'
 
+        self.use_keypoints = False # deactivate or activate keypoints
         self.use_fps_keypoints = False # experimental feature for 6d pose estimation
 
         # DEPTH OUTPUT (not tested)
