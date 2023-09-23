@@ -24,12 +24,26 @@ import util
 
 class BlenderGen:
     def __init__(self, cfg):
+        """Blender generator class used to generate synthetic images with annotations.
+
+        Args:
+            cfg: imported config.py file which is used to set parameters.
+
+        """
         self.cfg = cfg
-        self._roughness = []
-        self._metallic = []
+        self._roughness = [] # internal list for object roughness
+        self._metallic = [] # internal list for object metallicness
 
     def save_coco_label(self, images, annotations, Kdict):
-        # https://cocodataset.org/#format-data
+        """Write annoations in the Microsoft COCO format to disk as instances_default.json.
+
+        Args:
+            images: List of generated images.
+            annotations: List of annotations.
+            Kdict: Dictionary of camera matrix, generated with save_camera_matrix().
+
+        """
+        # file format: https://cocodataset.org/#format-data
         info = {
             "year": datetime.datetime.now().year,
             "version": "1.1",
@@ -64,8 +78,13 @@ class BlenderGen:
             json.dump(coco, write_file, indent=2)
 
     def import_ply_object(self, filepath, scale):
-        """import PLY object from path and scale it."""
-
+        """Import PLY object from path to the Blender scene and scale it.
+        
+        Args:
+            filepath: Path to PLY object.
+            scale: Desired object scale.
+        
+        """
         bpy.ops.import_mesh.ply(filepath=filepath)
         obj_list = bpy.context.selected_objects[:]
         obj_list[0].name = "Object"
@@ -93,8 +112,13 @@ class BlenderGen:
         return obj
 
     def import_obj_object(self, filepath, distractor=False):
-        """import an *.OBJ file to Blender"""
+        """Import an *.OBJ file to the Blender scene.
+        
+        Args:
+            filepath: Path to OBJ file.
+            distractor: True if it is a distractor object, False if it is the object of interest.
 
+        """
         name = "Object"
         file_path = filepath
         if distractor == True:
@@ -149,7 +173,16 @@ class BlenderGen:
         return obj
 
     def project_by_object_utils(self, cam, point):
-        """returns normalized (x, y) image coordinates in OpenCV frame for a given blender world point."""
+        """Returns normalized (x, y) image coordinates in OpenCV frame for a given Blender world point.
+        
+        Args:
+            cam: Blender camera object.
+            point: 3D world point that must be projected to 2D.
+
+        Returns:
+            Vector of normalized (x, y) coordinates.
+
+        """
 
         scene = bpy.context.scene
         co_2d = bpy_extras.object_utils.world_to_camera_view(scene, cam, point)
@@ -157,7 +190,12 @@ class BlenderGen:
         return Vector((co_2d.x, 1 - co_2d.y))  # normalized
 
     def setup_bg_image_nodes(self, rl):
-        """setup all compositor nodes to render background images"""
+        """Setup all compositor nodes to render background images.
+        
+        Args:
+            rl: Blender CompositorNodeRLayers.
+        
+        """
         # https://henryegloff.com/how-to-render-a-background-image-in-blender-2-8/
 
         bpy.context.scene.render.film_transparent = True
@@ -180,7 +218,7 @@ class BlenderGen:
         links.new(alpha_node.outputs["Image"], composite_node.inputs["Image"])
 
     def setup_camera(self):
-        """set camera config."""
+        """Set camera config."""
         camera = bpy.data.objects["Camera"]
 
         # camera config
@@ -222,7 +260,12 @@ class BlenderGen:
 
     @staticmethod
     def save_camera_matrix(K):
-        """save blenders camera matrix K to a file."""
+        """Save blenders camera matrix K to a file.
+        
+        Args:
+            K: 3x3 Camera matrix. Can be retrieved with get_camera_KRT().
+        
+        """
         # https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
 
         Kdict = {
@@ -240,11 +283,18 @@ class BlenderGen:
 
     @staticmethod
     def get_sphere_coordinates(radius, inclination, azimuth):
-        """convert sphere to cartesian coordinates."""
+        """Convert sphere to cartesian coordinates.
+        
+        Args:
+            radius: Sphere coordinate radius.
+            inclination: Sphere coordinate inclination θ [0, pi].
+            azimuth: Sphere coordinate azimuth φ [0, 2pi]
+        
+        Returns:
+            Cartesian 3D-point (x, y, z).
+        
+        """
         #  https://de.m.wikipedia.org/wiki/Kugelkoordinaten
-        #  radius r, inclination θ, azimuth φ)
-        #  inclination [0, pi]
-        #  azimuth [0, 2pi]
 
         x = radius * math.sin(inclination) * math.cos(azimuth)
         y = radius * math.sin(inclination) * math.sin(azimuth)
@@ -252,8 +302,18 @@ class BlenderGen:
         return (x, y, z)
 
     def place_camera(self, camera, radius, inclination, azimuth):
-        """sample x,y,z on sphere and place camera (looking at the origin)."""
+        """Sample x,y,z on sphere and place camera (looking at the origin).
+        
+        Args:
+            camera: Blender camera object.
+            radius: Sphere coordinate radius.
+            inclination: Sphere coordinate inclination θ [0, pi].
+            azimuth: Sphere coordinate azimuth φ [0, 2pi]
+        
+        Returns:
+            Blender camera object with new location.
 
+        """
         x, y, z = BlenderGen.get_sphere_coordinates(radius, inclination, azimuth)
         camera.location.x = x
         camera.location.y = y
@@ -263,7 +323,14 @@ class BlenderGen:
         return camera
 
     def setup_light(self, scene, light_number=1, random_color=None):
-        """create a random point light source."""
+        """Create a random point light source.
+        
+        Args:
+            scene: Blender scene.
+            light_number (int): Number of desired point lights.
+            random_color: Can be projector, temperature, or None.
+            
+        """
 
         if random_color == "temperature":
             light_color = util.get_random_temperature_color()
@@ -287,7 +354,15 @@ class BlenderGen:
             light_object.location = (x, y, z)
 
     def get_bg_image(self, bg_path):
-        """get list of all background images in folder 'bg_path' then choose random image."""
+        """Get list of all background images in folder 'bg_path' then choose random image.
+        
+        Args:
+            bg_path: Path to folder with background images.
+        
+        Returns:
+            Background image, background image path.
+        
+        """
 
         idx = random.randint(0, len(bg_path) - 1)
 
@@ -298,7 +373,7 @@ class BlenderGen:
         return bg_img, bg_img_path
 
     def add_shader_on_world(self):
-        """needed for Environment Map Background."""
+        """Needed for Environment Map Background."""
 
         bpy.data.worlds["World"].use_nodes = True
         env_node = bpy.data.worlds["World"].node_tree.nodes.new(
@@ -319,7 +394,16 @@ class BlenderGen:
         )
 
     def scene_cfg(self, camera, i):
-        """configure the blender scene with random distributions."""
+        """Configure the blender scene with random distributions.
+        
+        Args:
+            camera: Blender camera object.
+            i: ID of generated image and annotation.
+
+        Returns:
+            background image, image (for annotation), annotation.
+
+        """
 
         scene = bpy.data.scenes["Scene"]
         if not self.cfg.use_environment_maps:
@@ -831,7 +915,16 @@ class BlenderGen:
         bpy.context.scene.render.resolution_y = self.cfg.resolution_y
 
     def render(self, camera, depth_file_output):
-        """main loop to render images"""
+        """Main loop to render images.
+        
+        Args:
+            camera: Blender camera object.
+            depth_file_output: depth file from setup().
+        
+        Returns:
+            images, annotations.
+
+        """
 
         self.render_cfg()  # setup render config once
         annotations = []
@@ -874,9 +967,9 @@ class BlenderGen:
 
     def run(self):
         """
-        call this script with 'blender --background --python main.py'
+        Call this script with 'blender --background --python main.py'.
 
-        edit the config.py file to change configuration parameters
+        Edit the config.py file to change configuration parameters
 
         """
 
