@@ -6,7 +6,7 @@ If you use this code, please cite our work:
 
 > Eversberg, L.; Lambrecht, J. Generating Images with Physics-Based Rendering for an Industrial Object Detection Task: Realism versus Domain Randomization. Sensors 2021, 21, 7901. https://doi.org/10.3390/s21237901 
 > 
-![Screenshot](/example.png)
+![Screenshot](./references/example.png)
 
 ## Installation
 Download and unpack Blender in a folder /path/to/blender/blender-2.xx.x-linux64/ from [blender.org](https://www.blender.org/download/)
@@ -35,7 +35,7 @@ If you want to use random textures (e.g. from [polyhaven.com](https://polyhaven.
 
 ### UV Maps
 The 3D models need to have UV maps so that Blender can change the texture. You can create UV maps in blender by going to UV editing --> select your object --> UV --> Smart UV Project or Unwrap
-[<img src="/UV_mapping.png" width="800"/>](/UV_mapping.png)
+[<img src="./references/UV_mapping.png" width="800"/>](./references/UV_mapping.png)
 
 
 ## Usage
@@ -45,7 +45,7 @@ execute the following command in the terminal:
 ```
 blender --background --python main.py
 ```
-[<img src="blender_render.gif" width="800"/>](/blender_render.gif)
+[<img src="./references/blender_render.gif" width="800"/>](./references/blender_render.gif)
 
 ### Show annotations (bounding box)
 After rendering images, execute the following command in the terminal:
@@ -54,7 +54,7 @@ python show_annotations.py
 ```
 
 Annotations and images can be imported in [CVAT](https://github.com/opencv/cvat) using the COCO 1.0 format.
-[<img src="/CVAT_import.jpg" width="800"/>](/CVAT_import.jpg)
+[<img src="./references/CVAT_import.jpg" width="800"/>](./references/CVAT_import.jpg)
 
 
 ### Render image and open blender scene
@@ -65,7 +65,7 @@ To check the Blender scene setup, especially to configure the relationship betwe
 blender --python main.py
 ```
 
-[<img src="/blender_scene.png" width="400"/>](/blender_scene.png)
+[<img src="./references/blender_scene.png" width="400"/>](./references/blender_scene.png)
 
 ## config.py
 This python file contains a simple configuration class to configure the Blender generation script. The following parameters can be adapted to your specific application.
