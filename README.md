@@ -122,3 +122,6 @@ resolution_x | Pixel resolution of the output image (width)
 resolution_y | Pixel resolution of the output image (height)
 samples | Render engine number of samples (sets cycles.samples)
 number_of_renders | Number of rendered images
+
+## Using blender-gen with PyTorch
+A jupyter notebook showing how to use blender-gen to train an object detection model in PyTorch can be found at https://github.com/leoneversberg/object-detection-pytorch
