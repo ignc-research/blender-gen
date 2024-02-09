@@ -5,7 +5,11 @@ We generate different images by randomizing object and camera poses, lighting, b
 If you use this code, please cite our work:
 
 > Eversberg, L.; Lambrecht, J. Generating Images with Physics-Based Rendering for an Industrial Object Detection Task: Realism versus Domain Randomization. Sensors 2021, 21, 7901. https://doi.org/10.3390/s21237901 
-> 
+
+or
+
+> Eversberg, L.; Lambrecht, J. Combining Synthetic Images and Deep Active Learning: Data-Efficient Training of an Industrial Object Detection Model. J. Imaging 2024, 10, 16. https://doi.org/10.3390/jimaging10010016
+
 ![Screenshot](./references/example.png)
 
 ## Installation
