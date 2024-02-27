@@ -13,10 +13,11 @@ or
 ![Screenshot](./references/example.png)
 
 ## Installation
-Download and unpack Blender in a folder /path/to/blender/blender-2.xx.x-linux64/ from [blender.org](https://www.blender.org/download/)
+Download and unpack Blender in a folder /path/to/blender/blender-2.xx.x-linux64/ from [blender.org](https://download.blender.org/release/).
+I recommend using Blender 2.93.18, but Blender 3.3.16 also seems to work.
 To bind the 'blender' command to the blender application execute the following command in the terminal:
 ```
-sudo ln -s /full/path/to/blender/blender-2.xx.x-linux64/blender /usr/local/bin/blender
+sudo ln -s /full/path/to/blender/blender-2.93.18-linux64/blender /usr/local/bin/blender
 ```
 
 ### Getting Started
