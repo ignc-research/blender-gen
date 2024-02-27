@@ -782,7 +782,6 @@ class BlenderGen:
 
     def setup(self):
         """one time config setup for blender."""
-        bpy.ops.wm.read_factory_settings()
 
         bpy.ops.object.select_all(action="TOGGLE")
         camera = self.setup_camera()
