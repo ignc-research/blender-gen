@@ -979,7 +979,7 @@ class BlenderGen:
         K, RT = self.get_camera_KRT(bpy.data.objects["Camera"])
         Kdict = BlenderGen.save_camera_matrix(K)  # save camera matrix to K.txt
         bpy.ops.wm.save_as_mainfile(
-            filepath="./scene.blend", check_existing=False
+            filepath=f"{os.getcwd()}/scene.blend", check_existing=False
         )  # save current scene as .blend file
         shutil.copy2(
             "config.py", "DATASET/" + self.cfg.out_folder
