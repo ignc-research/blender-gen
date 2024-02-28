@@ -507,6 +507,7 @@ class BlenderGen:
 
         # random metallic material
         if self.cfg.random_metallic_value:
+            mat = obj.active_material
             if random.random() >= 0.5:
                 mat.node_tree.nodes["Principled BSDF"].inputs[
                     "Metallic"
@@ -518,6 +519,7 @@ class BlenderGen:
 
         # random roughness material
         if self.cfg.random_roughness_value:
+            mat = obj.active_material
             if random.random() >= 0.5:
                 mat.node_tree.nodes["Principled BSDF"].inputs[
                     "Roughness"

@@ -33,7 +33,6 @@ class cfg:
         self.light_number_max = 3  # only for background images
         self.light_energymin = 20  # only for background images
         self.light_energymax = 80  # only for background images
-        self.random_hsv_value = False  # randomize the value of HSV color space of the object with p=0.5
         self.random_metallic_value = False  # randomize the metallic object value with p=0.5
         self.random_roughness_value = False  # randomize the roughness object value with p=0.5
         self.random_color = "None"  # choose "None", "temperature", "projector"
