@@ -142,15 +142,6 @@ class BlenderGen:
         bsdf = nodes.get("Principled BSDF")
 
         if (
-            distractor == True and texture_path
-        ):  # import original distractor png texture
-            texture = nodes.get("Image Texture")
-            bpy.data.images.load(
-                texture_path
-            )  # texture needs the same name as obj file
-            texture.image = bpy.data.images[os.path.split(texture_path)[1]]
-
-        elif (
             distractor == True and len(self.cfg.distractor_texture_path) > 0
         ):  # distractor with random texture
             texture = nodes.new(type="ShaderNodeTexImage")  # new node
@@ -837,9 +828,6 @@ class BlenderGen:
             obj = self.import_obj_object(
                 filepath=self.cfg.distractor_paths[i], distractor=True
             )
-
-        #  save model real world bounding box for PnP algorithm
-        np.savetxt("model_bounding_box.txt", util.orderCorners(obj.bound_box))
 
         if self.cfg.use_environment_maps:
             self.add_shader_on_world()  # used for HDR background image
