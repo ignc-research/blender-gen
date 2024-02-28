@@ -31,8 +31,8 @@ class BlenderGen:
 
         """
         self.cfg = cfg
-        self._roughness = [] # internal list for object roughness
-        self._metallic = [] # internal list for object metallicness
+        self._roughness = []  # internal list for object roughness
+        self._metallic = []  # internal list for object metallicness
 
     def save_coco_label(self, images, annotations, Kdict):
         """Write annoations in the Microsoft COCO format to disk as instances_default.json.
@@ -79,11 +79,11 @@ class BlenderGen:
 
     def import_ply_object(self, filepath, scale):
         """Import PLY object from path to the Blender scene and scale it.
-        
+
         Args:
             filepath: Path to PLY object.
             scale: Desired object scale.
-        
+
         """
         bpy.ops.import_mesh.ply(filepath=filepath)
         obj_list = bpy.context.selected_objects[:]
@@ -113,7 +113,7 @@ class BlenderGen:
 
     def import_obj_object(self, filepath, distractor=False):
         """Import an *.OBJ file to the Blender scene.
-        
+
         Args:
             filepath: Path to OBJ file.
             distractor: True if it is a distractor object, False if it is the object of interest.
@@ -174,7 +174,7 @@ class BlenderGen:
 
     def project_by_object_utils(self, cam, point):
         """Returns normalized (x, y) image coordinates in OpenCV frame for a given Blender world point.
-        
+
         Args:
             cam: Blender camera object.
             point: 3D world point that must be projected to 2D.
@@ -191,10 +191,10 @@ class BlenderGen:
 
     def setup_bg_image_nodes(self, rl):
         """Setup all compositor nodes to render background images.
-        
+
         Args:
             rl: Blender CompositorNodeRLayers.
-        
+
         """
         # https://henryegloff.com/how-to-render-a-background-image-in-blender-2-8/
 
@@ -261,10 +261,10 @@ class BlenderGen:
     @staticmethod
     def save_camera_matrix(K):
         """Save blenders camera matrix K to a file.
-        
+
         Args:
             K: 3x3 Camera matrix. Can be retrieved with get_camera_KRT().
-        
+
         """
         # https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
 
@@ -284,15 +284,15 @@ class BlenderGen:
     @staticmethod
     def get_sphere_coordinates(radius, inclination, azimuth):
         """Convert sphere to cartesian coordinates.
-        
+
         Args:
             radius: Sphere coordinate radius.
             inclination: Sphere coordinate inclination θ [0, pi].
             azimuth: Sphere coordinate azimuth φ [0, 2pi]
-        
+
         Returns:
             Cartesian 3D-point (x, y, z).
-        
+
         """
         #  https://de.m.wikipedia.org/wiki/Kugelkoordinaten
 
@@ -303,13 +303,13 @@ class BlenderGen:
 
     def place_camera(self, camera, radius, inclination, azimuth):
         """Sample x,y,z on sphere and place camera (looking at the origin).
-        
+
         Args:
             camera: Blender camera object.
             radius: Sphere coordinate radius.
             inclination: Sphere coordinate inclination θ [0, pi].
             azimuth: Sphere coordinate azimuth φ [0, 2pi]
-        
+
         Returns:
             Blender camera object with new location.
 
@@ -324,12 +324,12 @@ class BlenderGen:
 
     def setup_light(self, scene, light_number=1, random_color=None):
         """Create a random point light source.
-        
+
         Args:
             scene: Blender scene.
             light_number (int): Number of desired point lights.
             random_color: Can be projector, temperature, or None.
-            
+
         """
 
         if random_color == "temperature":
@@ -355,13 +355,13 @@ class BlenderGen:
 
     def get_bg_image(self, bg_path):
         """Get list of all background images in folder 'bg_path' then choose random image.
-        
+
         Args:
             bg_path: Path to folder with background images.
-        
+
         Returns:
             Background image, background image path.
-        
+
         """
 
         idx = random.randint(0, len(bg_path) - 1)
@@ -395,7 +395,7 @@ class BlenderGen:
 
     def scene_cfg(self, camera, i):
         """Configure the blender scene with random distributions.
-        
+
         Args:
             camera: Blender camera object.
             i: ID of generated image and annotation.
@@ -419,9 +419,9 @@ class BlenderGen:
             # set HDRI Environment texture
             bg_img, bg_img_path = self.get_bg_image(self.cfg.environment_paths)
             bpy.data.images.load(bg_img_path)
-            bpy.data.worlds["World"].node_tree.nodes[
-                "Environment Texture"
-            ].image = bpy.data.images[bg_img]
+            bpy.data.worlds["World"].node_tree.nodes["Environment Texture"].image = (
+                bpy.data.images[bg_img]
+            )
 
             # set Emission Node Strength E
             bpy.data.worlds["World"].node_tree.nodes["Emission"].inputs[
@@ -601,10 +601,7 @@ class BlenderGen:
             corners = util.orderCorners(
                 obj.bound_box
             )  # change order from blender to SSD paper
-            if self.cfg.use_fps_keypoints:
-                corners = np.loadtxt("fps_CAD.txt")
 
-            kps = []
             repeat = False
             for corner in corners:
                 p = obj.matrix_world @ Vector(corner)  # object space to world space
@@ -617,10 +614,6 @@ class BlenderGen:
                     v = 1  # v=1: labeled but not visible
                 else:
                     v = 2  # v=2: labeled and visible
-                # 8 bounding box keypoints
-                kps.append(
-                    [p[0] * self.cfg.resolution_x, p[1] * self.cfg.resolution_y, v]
-                )
 
                 # filter out objects outside of the image view
                 if (
@@ -728,25 +721,6 @@ class BlenderGen:
             labels[1] = (max_x + min_x) / 2
             labels[2] = (max_y + min_y) / 2
 
-            #  keypoints (kps) for 6D Pose Estimation
-            # kps.insert(0, [
-            #    self.cfg.resolution_x * (max_x + min_x) / 2, self.cfg.resolution_y *
-            #    (max_y + min_y) / 2, 2
-            # ])  # center is the 1st keypoint
-
-            if self.cfg.use_fps_keypoints == False:
-                kps.insert(
-                    0,
-                    [
-                        self.cfg.resolution_x * center[0],
-                        self.cfg.resolution_y * center[1],
-                        2,
-                    ],
-                )  # center is the 1st keypoint
-
-            if self.cfg.use_keypoints == False:
-                kps = []
-
             if not repeat:
                 # save COCO label
                 image = {
@@ -774,8 +748,8 @@ class BlenderGen:
                         * self.cfg.resolution_y,
                         2,
                     ),
-                    "keypoints": kps,
-                    "num_keypoints": len(kps),
+                    "keypoints": [],
+                    "num_keypoints": 0,
                 }
 
         return bg_img, image, annotation
@@ -903,9 +877,9 @@ class BlenderGen:
             bpy.context.scene.render.engine = "BLENDER_EEVEE"
             bpy.context.scene.eevee.taa_render_samples = self.cfg.samples
         if self.cfg.use_GPU:
-            bpy.context.preferences.addons[
-                "cycles"
-            ].preferences.compute_device_type = "CUDA"
+            bpy.context.preferences.addons["cycles"].preferences.compute_device_type = (
+                "CUDA"
+            )
             bpy.context.scene.cycles.device = "GPU"
 
         # https://docs.blender.org/manual/en/latest/files/media/image_formats.html
@@ -915,11 +889,11 @@ class BlenderGen:
 
     def render(self, camera, depth_file_output):
         """Main loop to render images.
-        
+
         Args:
             camera: Blender camera object.
             depth_file_output: depth file from setup().
-        
+
         Returns:
             images, annotations.
 
