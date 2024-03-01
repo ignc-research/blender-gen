@@ -361,7 +361,7 @@ class BlenderGen:
         randomImgNumber = random.randint(0, len(img_list) - 1)
         bg_img = img_list[randomImgNumber]
         bg_img_path = os.path.join(bg_path[idx], bg_img)
-        return bg_img, bg_img_path
+        return bg_img, os.path.abspath(bg_img_path)
 
     def add_shader_on_world(self):
         """Needed for Environment Map Background."""
@@ -459,7 +459,9 @@ class BlenderGen:
                 texture_list = os.listdir(self.cfg.distractor_texture_path)
                 texture_path = texture_list[random.randint(0, len(texture_list) - 1)]
                 bpy.data.images.load(
-                    self.cfg.distractor_texture_path + "/" + texture_path
+                    os.path.abspath(
+                        os.path.join(self.cfg.distractor_texture_path, texture_path)
+                    )
                 )
                 texture.image = bpy.data.images[texture_path]
 
@@ -471,7 +473,11 @@ class BlenderGen:
             texture_list = os.listdir(self.cfg.object_texture_path)
             texture_path = texture_list[random.randint(0, len(texture_list) - 1)]
             #  load object textures
-            bpy.data.images.load(self.cfg.object_texture_path + "/" + texture_path)
+            bpy.data.images.load(
+                os.path.abspath(
+                    os.path.join(self.cfg.object_texture_path, texture_path)
+                )
+            )
             texture.image = bpy.data.images[texture_path]
 
         if not self.cfg.distractor_paths:  # an empty list is False
@@ -899,8 +905,10 @@ class BlenderGen:
         if self.cfg.test:
             self.cfg.number_of_renders = 1
         for i in range(self.cfg.number_of_renders):
-            bpy.context.scene.render.filepath = (
-                "./DATASET/" + self.cfg.out_folder + "/images/{:06}.jpg".format(i)
+            bpy.context.scene.render.filepath = os.path.abspath(
+                os.path.join(
+                    "DATASET", self.cfg.out_folder, "images/{:06}.jpg".format(i)
+                )
             )
             bg_img, image, annotation = self.scene_cfg(camera, i)
             images.append(image)
@@ -943,10 +951,10 @@ class BlenderGen:
         K, RT = self.get_camera_KRT(bpy.data.objects["Camera"])
         Kdict = BlenderGen.save_camera_matrix(K)  # save camera matrix to K.txt
         bpy.ops.wm.save_as_mainfile(
-            filepath=f"{os.getcwd()}/scene.blend", check_existing=False
+            filepath=os.path.join(os.getcwd(), "scene.blend"), check_existing=False
         )  # save current scene as .blend file
         shutil.copy2(
-            "config.py", "DATASET/" + self.cfg.out_folder
+            "config.py", os.path.join("DATASET", self.cfg.out_folder)
         )  # save config.py file
         self.save_coco_label(
             images, annotations, Kdict
