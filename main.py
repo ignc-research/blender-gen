@@ -128,7 +128,10 @@ class BlenderGen:
             if texture_path:
                 texture_path = glob.glob(filepath + "/*.png")[0]
 
-        bpy.ops.import_scene.obj(filepath=file_path, axis_forward="Y", axis_up="Z")
+        if bpy.app.version[0] >= 4:
+            bpy.ops.wm.obj_import(filepath=file_path, forward_axis="Y", up_axis="Z")
+        else:
+            bpy.ops.import_scene.obj(filepath=file_path, axis_forward="Y", axis_up="Z")
         print("importing model with axis_forward=Y, axis_up=Z")
 
         obj_objects = bpy.context.selected_objects[:]
